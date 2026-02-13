@@ -43,6 +43,22 @@ echo "TFY_API_KEY: ${TFY_API_KEY:+(set)}${TFY_API_KEY:-(not set)}"
 echo "TFY_WORKSPACE_FQN: ${TFY_WORKSPACE_FQN:-(not set)}"
 ```
 
+### Interpret CLI Version
+
+After running `tfy --version`, interpret the result:
+
+| CLI Output | Status | Action |
+|-----------|--------|--------|
+| `tfy version X.Y.Z` (>= 0.5.0) | Current | Use `tfy apply` as documented below. |
+| `tfy version X.Y.Z` (0.3.x–0.4.x) | Outdated | Upgrade recommended: `pip install -U truefoundry`. Core `tfy apply` should still work. |
+| `servicefoundry version X.Y.Z` | Legacy CLI | This is the old CLI name. Upgrade: `pip install -U truefoundry`. |
+| Command not found | Not installed | Install: `pip install truefoundry && tfy login --host "$TFY_BASE_URL"` |
+
+**For full environment detection** (SDK + CLI + Python), run:
+```bash
+$TFY_SKILL_DIR/scripts/tfy-version.sh all
+```
+
 **If tfy CLI is not installed**, guide the user:
 ```bash
 pip install truefoundry

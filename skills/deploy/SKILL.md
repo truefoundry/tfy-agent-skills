@@ -40,6 +40,48 @@ echo "TFY_WORKSPACE_FQN: ${TFY_WORKSPACE_FQN:-(not set)}"
 
 **If TFY_WORKSPACE_FQN is not set, STOP. Ask the user.** Suggest they use the `workspaces` skill or check the TrueFoundry dashboard.
 
+## Step -1: Detect SDK & Environment
+
+**Before anything else**, detect the installed SDK version and Python environment. This prevents deployment failures from version mismatches.
+
+```bash
+# Run version detection (from this skill's scripts directory)
+$TFY_SKILL_DIR/scripts/tfy-version.sh all
+```
+
+### Interpret Results
+
+| SDK Version | Action |
+|------------|--------|
+| >= 0.5.0 | Use deploy patterns as-is. `replicas` accepts `int`. |
+| 0.4.x | Apply compat: use `Replicas(min=N, max=N)` object, ensure `TFY_HOST` is set. |
+| 0.3.x | Legacy SDK. Consider upgrading (`pip install -U truefoundry`) or fall back to REST API. |
+| Not installed | Fall back to REST API deployment via `tfy-api.sh` with JSON manifest. See `tfy-apply` skill. |
+
+| Python Version | Action |
+|---------------|--------|
+| 3.10–3.12 | Compatible. Proceed normally. |
+| 3.13+ | SDK may not support this version. Create a compatible venv: |
+
+```bash
+# Python 3.13+ workaround
+python3.12 -m venv .venv-deploy
+source .venv-deploy/bin/activate
+pip install truefoundry python-dotenv
+```
+
+| CLI (`tfy`) | Action |
+|------------|--------|
+| Installed | Can use `tfy apply` for declarative deploys (see `tfy-apply` skill). |
+| Not installed | Use Python SDK deploy or REST API. |
+
+**If SDK is not installed and user wants SDK-based deploy**, install it:
+```bash
+pip install truefoundry python-dotenv
+```
+
+Then re-run version detection to confirm.
+
 ## Step 0: Discover Cluster Capabilities
 
 **Before asking the user about resources, GPUs, or public URLs**, fetch the cluster's capabilities so you can present only what's actually available.

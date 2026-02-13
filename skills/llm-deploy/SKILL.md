@@ -38,6 +38,37 @@ echo "TFY_WORKSPACE_FQN: ${TFY_WORKSPACE_FQN:-(not set)}"
 
 **If TFY_WORKSPACE_FQN is not set, STOP. Ask the user.** Suggest they use the `workspaces` skill or check the TrueFoundry dashboard.
 
+## Step 0a: Detect Environment & Versions
+
+**Before deploying**, detect the installed tools and container image versions.
+
+```bash
+# Run version detection
+$TFY_SKILL_DIR/scripts/tfy-version.sh all
+```
+
+### Interpret Results
+
+| Component | Action |
+|-----------|--------|
+| SDK installed | Can use Python SDK for deployment if needed |
+| CLI (`tfy`) installed | Use `tfy apply` with YAML manifest (recommended for LLM deploys) |
+| Neither installed | Install CLI: `pip install truefoundry` |
+| Python 3.13+ | Create venv with Python 3.12 if SDK needed |
+
+### Verify Container Image Versions
+
+Before using the manifest templates below, check `references/container-versions.md` for the latest pinned versions. Container images for vLLM and TGI are updated frequently.
+
+**To check for newer versions on demand:**
+
+```
+WebFetch https://github.com/vllm-project/vllm/releases → latest stable vLLM version
+WebFetch https://github.com/huggingface/text-generation-inference/releases → latest stable TGI version
+```
+
+If a newer stable version exists, use it instead of the pinned version. Avoid release candidates.
+
 ## Step 0: Discover Cluster Capabilities
 
 **Before asking the user about GPU types or public URLs**, fetch the cluster's capabilities.
@@ -126,6 +157,21 @@ System memory (RAM) must be **much larger** than GPU VRAM because:
 - The OS and Python runtime need memory too
 - Rule of thumb: RAM should be 2–4x the model's VRAM footprint
 
+## Verify Container Image Versions
+
+Before building the manifest, check for the latest stable container image versions. Default pinned versions are in `references/container-versions.md`:
+
+| Framework | Default Image | Check for Updates |
+|-----------|--------------|-------------------|
+| vLLM | `public.ecr.aws/truefoundrycloud/vllm/vllm-openai:v0.13.0` | [vLLM Releases](https://github.com/vllm-project/vllm/releases) |
+| TGI | `ghcr.io/huggingface/text-generation-inference:2.4.1` | [TGI Releases](https://github.com/huggingface/text-generation-inference/releases) |
+| NVIDIA NIM | `nvcr.io/nim/{model-path}:{version}` | [NGC Catalog](https://catalog.ngc.nvidia.com) |
+
+**Agent instructions:**
+- Consider running WebFetch on the release page above to check if a newer stable version exists before deploying.
+- If the user requests a specific version, use that instead of these defaults.
+- Avoid release candidates — use stable releases only.
+
 ## Step 3: Build the Manifest
 
 ### vLLM Manifest Template
@@ -137,7 +183,7 @@ type: service
 name: {MODEL_NAME}
 image:
   type: image
-  image_uri: public.ecr.aws/truefoundrycloud/vllm/vllm-openai:v0.13.0
+  image_uri: public.ecr.aws/truefoundrycloud/vllm/vllm-openai:v0.13.0  # see references/container-versions.md
   command: >-
     python3 -u -m vllm.entrypoints.openai.api_server
     --host 0.0.0.0 --port 8000
@@ -258,7 +304,7 @@ type: service
 name: {MODEL_NAME}
 image:
   type: image
-  image_uri: ghcr.io/huggingface/text-generation-inference:2.4.1
+  image_uri: ghcr.io/huggingface/text-generation-inference:2.4.1  # see references/container-versions.md
   command: >-
     text-generation-launcher
     --model-id '$(MODEL_ID)'
@@ -365,7 +411,7 @@ type: service
 name: {MODEL_NAME}-nim
 image:
   type: image
-  image_uri: nvcr.io/nim/{MODEL_PATH}:{VERSION}
+  image_uri: nvcr.io/nim/{MODEL_PATH}:{VERSION}  # see references/container-versions.md
 ports:
   - port: 8000
     expose: {EXPOSE}
