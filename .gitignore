@@ -1,0 +1,11 @@
+.env
+.venv-deploy/
+__pycache__/
+*.pyc
+.claude/
+.codex/
+.cursor/
+/AGENTS.md
+/agents.md
+/CLAUDE.md
+/claude.md
