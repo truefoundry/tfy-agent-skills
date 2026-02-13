@@ -508,31 +508,72 @@ tfy_applications_create_deployment(
 )
 ```
 
-## Step 5: Verify Deployment
+## Step 5: Verify Deployment & Return URL
 
-After submitting, monitor the deployment:
+**CRITICAL: Always fetch and return the deployment URL and status to the user. A deployment without a reported URL is incomplete.**
 
-1. **Check application status:**
-   ```bash
-   $TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationName=MODEL_NAME'
-   ```
+### Poll Deployment Status
 
-2. **LLM deployments take time** — GPU node provisioning (5–15 min if scaling up), model download (depends on model size), and model loading into GPU memory all happen before the service is ready. The startup probe allows up to 350 seconds (35 retries x 10s).
+After submitting the manifest, poll for status:
 
-3. **Test the endpoint** (once healthy):
-   ```bash
-   # Health check
-   curl https://{HOST}/health
+```bash
+$TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationName=MODEL_NAME'
+```
 
-   # OpenAI-compatible completion (vLLM)
-   curl https://{HOST}/v1/chat/completions \
-     -H "Content-Type: application/json" \
-     -d '{
-       "model": "{MODEL_NAME}",
-       "messages": [{"role": "user", "content": "Hello!"}],
-       "max_tokens": 100
-     }'
-   ```
+**LLM deployments take longer than regular services:**
+- GPU node provisioning: 5–15 min (if scaling up)
+- Model download: 2–10 min (depends on model size and cache)
+- Model loading into GPU: 1–5 min
+- Total: typically 10–30 min for first deployment
+
+### Report to User
+
+**Always present this summary after deployment:**
+
+```
+LLM Deployment submitted!
+
+Model: {hf-model-id}
+Service: {service-name}
+Framework: vLLM / TGI / NIM
+Workspace: {workspace-fqn}
+GPU: {gpu-count}x {gpu-type}
+Status: {BUILDING|DEPLOYING|RUNNING}
+
+Endpoints:
+  Public URL:   https://{host} (available once RUNNING)
+  Internal DNS: {service-name}.{namespace}.svc.cluster.local:8000
+
+OpenAI-compatible API (once RUNNING):
+  curl https://{host}/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{"model": "{model-name}", "messages": [{"role": "user", "content": "Hello!"}], "max_tokens": 100}'
+
+Health check:
+  curl https://{host}/health
+
+Note: LLM deployments typically take 10-30 minutes for first deploy
+(GPU provisioning + model download + loading). Check status with
+the applications skill.
+```
+
+### Test Once Running
+
+When the service reaches RUNNING status:
+
+```bash
+# Health check
+curl https://{HOST}/health
+
+# OpenAI-compatible completion (vLLM/TGI)
+curl https://{HOST}/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "{MODEL_NAME}",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 100
+  }'
+```
 
 ## Public URL
 

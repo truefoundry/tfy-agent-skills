@@ -577,15 +577,66 @@ pip install truefoundry python-dotenv
 python deploy.py
 ```
 
-## After Deploy
+## After Deploy — Get & Return URL
+
+**CRITICAL: Always fetch and return the deployment URL to the user. A deployment without a URL is incomplete.**
+
+### Step 1: Poll for Deployment Status
+
+After `python deploy.py` completes, the deployment is submitted but not yet live. Poll the status:
+
+```bash
+TFY_API_SH=~/.claude/skills/truefoundry-deploy/scripts/tfy-api.sh
+
+# Get application details — replace SERVICE_NAME and WORKSPACE_FQN
+$TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationName=SERVICE_NAME'
+```
+
+Or via MCP:
+```
+tfy_applications_list(filters={"workspace_fqn": "WORKSPACE_FQN", "application_name": "SERVICE_NAME"})
+```
+
+### Step 2: Extract the URL
+
+From the API response, look for the endpoint URL in the application object:
+- **Public services**: The URL is in `ports[].host` or constructed from the host you set during deployment
+- **Internal services**: The internal DNS is `{service-name}.{namespace}.svc.cluster.local:{port}`
+
+### Step 3: Report to User
+
+**Always present this summary after deployment:**
 
 ```
-Deployment submitted. Check the TrueFoundry dashboard for status and URL.
+Deployment successful!
+
+Service: {service-name}
+Workspace: {workspace-fqn}
+Status: {BUILDING|DEPLOYING|RUNNING}
+
+Endpoints:
+  Public URL:   https://{host} (available once status is RUNNING)
+  Internal DNS: {service-name}.{namespace}.svc.cluster.local:{port}
+
+Next steps:
+  - Wait for status to become RUNNING (check with: applications skill)
+  - Test the endpoint: curl https://{host}/health
+  - View logs if issues: logs skill
 ```
 
-- **Check status**: Use `applications` skill to list deployments
-- **View logs**: Use `logs` skill
-- **Get the URL**: Check dashboard or use `applications` skill to find the service URL
+**If the service has a public URL**, include the full `https://` URL.
+**If internal-only**, show the Kubernetes DNS address and explain how other services can reach it.
+**If status is still BUILDING**, tell the user it will take a few minutes and suggest checking back.
+
+### Step 4: Verify Health (Optional but Recommended)
+
+If the deployment shows RUNNING status, do a quick health check:
+
+```bash
+curl -s https://{host}/health
+```
+
+Report the result to the user.
 
 ## Composability
 
