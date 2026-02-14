@@ -1,7 +1,7 @@
 ---
 name: llm-benchmarking
 description: This skill should be used when the user asks "benchmark model", "test LLM performance", "load test model", "inference benchmark", "measure latency", "test throughput", "benchmark deployed model", "stress test LLM", or wants to evaluate the performance of a deployed LLM on TrueFoundry.
-allowed-tools: Bash(python*), Bash(pip*), Bash(*/tfy-api.sh *)
+allowed-tools: Bash(python*) Bash(pip*) Bash(*/tfy-api.sh *)
 ---
 
 # LLM Benchmarking on TrueFoundry

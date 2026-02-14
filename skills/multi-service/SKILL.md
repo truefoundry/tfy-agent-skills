@@ -2,7 +2,7 @@
 name: multi-service
 description: This skill should be used when the user asks "deploy my full app", "deploy frontend and backend", "multi-service deployment", "deploy all services", "microservices deployment", or has a project with multiple interconnected services that need coordinated deployment on TrueFoundry.
 disable-model-invocation: true
-allowed-tools: Bash(*/tfy-api.sh *), Bash(python*), Bash(pip*)
+allowed-tools: Bash(*/tfy-api.sh *) Bash(python*) Bash(pip*)
 ---
 
 # Multi-Service Application Deployment

@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,7 +17,13 @@ jobs:
       - name: Shellcheck scripts
         run: |
           shellcheck scripts/*.sh hooks/auto-approve-tfy-api.sh skills/_shared/scripts/tfy-api.sh
-          find skills -mindepth 2 -name 'tfy-api.sh' -print0 | xargs -0 -r shellcheck
+          find skills -mindepth 2 -name '*.sh' -print0 | xargs -0 -r shellcheck
+
+      - name: Validate skills
+        run: ./scripts/validate-skills.sh
+
+      - name: tfy-api failure-mode tests
+        run: ./scripts/test-tfy-api.sh
 
       - name: Install script smoke test
         run: |

@@ -1,7 +1,7 @@
 ---
 name: llm-finetuning
 description: This skill should be used when the user asks "finetune a model", "fine-tune LLM", "train a model", "LoRA finetuning", "QLoRA finetuning", "full finetuning", "fine-tune on my data", "customize a model", "adapt a model", or wants to fine-tune a large language model on TrueFoundry.
-allowed-tools: Bash(python*), Bash(pip*), Bash(*/tfy-api.sh *)
+allowed-tools: Bash(python*) Bash(pip*) Bash(*/tfy-api.sh *)
 ---
 
 # LLM Fine-Tuning
