@@ -2,7 +2,7 @@
 
 Agent skills for [TrueFoundry](https://truefoundry.com), following the [Agent Skills](https://agentskills.io) open format.
 
-Deploy, monitor, and manage your ML infrastructure without leaving your editor.
+Deploy, monitor, and manage your AI infrastructure without leaving your favourite editor.
 
 ## Quick Start
 
