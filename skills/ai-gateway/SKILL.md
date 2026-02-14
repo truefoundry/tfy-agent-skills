@@ -1,7 +1,7 @@
 ---
 name: ai-gateway
 description: This skill should be used when the user asks "use AI gateway", "call LLM through gateway", "gateway API", "unified LLM API", "route LLM requests", "rate limit LLM", "LLM proxy", "model routing", or wants to use TrueFoundry's AI Gateway to access LLMs through a unified API.
-allowed-tools: Bash(*/tfy-api.sh *), Bash(curl*), Bash(python*)
+allowed-tools: Bash(*/tfy-api.sh *) Bash(curl*) Bash(python*)
 ---
 
 # AI Gateway

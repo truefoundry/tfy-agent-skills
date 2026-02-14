@@ -46,7 +46,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 ```
 
 - `description` controls when the agent auto-invokes the skill (model-invoked).
-- `disable-model-invocation: true` (used by `deploy`, `helm`, `llm-deploy`, `async-service`, `multi-service`) means the skill only runs on explicit user request.
+- The explicit-only skills are: `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`.
 - `allowed-tools` grants the skill permission to run specific commands without prompting.
 
 ### Shared files

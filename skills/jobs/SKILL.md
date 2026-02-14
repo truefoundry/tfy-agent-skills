@@ -1,7 +1,7 @@
 ---
 name: jobs
 description: This skill should be used when the user asks "deploy a job", "create a job", "run a batch task", "schedule a job", "show job runs", "list runs", "job status", "is my job running", or wants to deploy or monitor TrueFoundry job executions. For listing job applications, use applications skill.
-allowed-tools: Bash(*/tfy-api.sh *), Bash(python*), Bash(pip*)
+allowed-tools: Bash(*/tfy-api.sh *) Bash(python*) Bash(pip*)
 ---
 
 # Jobs

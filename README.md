@@ -115,7 +115,7 @@ The install script prefixes each skill with `truefoundry-` (e.g. `truefoundry-de
 | [prompts](skills/prompts/SKILL.md) | "show my prompts" | Browse prompt registry versions |
 | [docs](skills/docs/SKILL.md) | "truefoundry docs" | Fetch platform documentation |
 
-Skills are model-invoked — your agent picks the right one based on what you ask. The exceptions are `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`, which only run when you explicitly request them.
+Skills are model-invoked — your agent picks the right one based on what you ask. The explicit-only skills are: `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`.
 
 ## Setup
 

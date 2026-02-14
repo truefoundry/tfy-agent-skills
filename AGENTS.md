@@ -10,8 +10,7 @@ matching each skill description. Each skill lives in `skills/{name}/SKILL.md`.
 
 Read `skills/{name}/SKILL.md` for detailed usage, examples, and error handling.
 
-Exception: `deploy` and `helm` have `disable-model-invocation: true` — they only run when
-the user explicitly asks to deploy (never auto-triggered).
+The explicit-only skills are: `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`.
 
 Available skills in this repo:
 - `ai-gateway`

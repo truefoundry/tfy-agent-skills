@@ -1,7 +1,7 @@
 ---
 name: mcp-server
 description: This skill should be used when the user asks "deploy MCP server", "host MCP server", "MCP deployment", "deploy tool server", "model context protocol", or wants to deploy an MCP server on TrueFoundry as a hosted HTTP service.
-allowed-tools: Bash(*/tfy-api.sh *), Bash(python*), Bash(pip*)
+allowed-tools: Bash(*/tfy-api.sh *) Bash(python*) Bash(pip*)
 ---
 
 # MCP Server Deployment

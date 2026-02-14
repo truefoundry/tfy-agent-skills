@@ -1,7 +1,7 @@
 ---
 name: workflows
 description: This skill should be used when the user asks "create a workflow", "deploy a workflow", "run a pipeline", "schedule a workflow", "cron workflow", "TrueFoundry workflow", or wants to build data processing or ML training pipelines using TrueFoundry Workflows (built on Flyte).
-allowed-tools: Bash(python*), Bash(pip*)
+allowed-tools: Bash(python*) Bash(pip*)
 ---
 
 # TrueFoundry Workflows
