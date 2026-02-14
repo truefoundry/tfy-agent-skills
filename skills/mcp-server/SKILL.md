@@ -35,7 +35,7 @@ For MCP servers distributed as npm packages.
 
 ### Via API
 
-When using direct API, use the **full path** to this skill's `scripts/tfy-api.sh`. The path depends on which agent is installed (e.g. `~/.claude/skills/truefoundry-mcp-server/scripts/tfy-api.sh` for Claude Code). In the examples below, replace `TFY_API_SH` with the full path.
+When using direct API, set `TFY_API_SH` to the full path of this skill's `scripts/tfy-api.sh`. See `references/tfy-api-setup.md` for paths per agent.
 
 ```bash
 TFY_API_SH=~/.claude/skills/truefoundry-mcp-server/scripts/tfy-api.sh

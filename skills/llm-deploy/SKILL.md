@@ -28,16 +28,9 @@ Deploy large language models and ML inference servers to TrueFoundry. Supports v
 **Always verify before deploying:**
 
 1. **Credentials** — `TFY_BASE_URL` and `TFY_API_KEY` must be set (env or `.env`)
-2. **Workspace** — `TFY_WORKSPACE_FQN` is **required**. Never auto-pick. Ask the user if missing.
+2. **Workspace** — `TFY_WORKSPACE_FQN` required. **Never auto-pick. Ask the user if missing.**
 
-```bash
-# Check credentials
-echo "TFY_BASE_URL: ${TFY_BASE_URL:-(not set)}"
-echo "TFY_API_KEY: ${TFY_API_KEY:+(set)}${TFY_API_KEY:-(not set)}"
-echo "TFY_WORKSPACE_FQN: ${TFY_WORKSPACE_FQN:-(not set)}"
-```
-
-**If TFY_WORKSPACE_FQN is not set, STOP. Ask the user.** Suggest they use the `workspaces` skill or check the TrueFoundry dashboard.
+For credential check commands and .env setup, see `references/prerequisites.md`.
 
 ## Step 0a: Detect Environment & Versions
 
@@ -74,22 +67,11 @@ If a newer stable version exists, use it instead of the pinned version. Avoid re
 
 **Before asking the user about GPU types or public URLs**, fetch the cluster's capabilities.
 
-### Get Cluster ID
+Fetch the cluster's capabilities before asking about resources or public URLs. See `references/cluster-discovery.md` for how to extract cluster ID from workspace FQN and fetch cluster details (GPUs, base domains, storage classes).
 
-Extract from workspace FQN (part before the colon):
-- Workspace FQN `tfy-ea-dev-eo-az:sai-ws` → Cluster ID `tfy-ea-dev-eo-az`
-- Or use `TFY_CLUSTER_ID` from environment if set.
+When using direct API, set `TFY_API_SH` to the full path of this skill's `scripts/tfy-api.sh`. See `references/tfy-api-setup.md` for paths per agent.
 
-### Fetch Cluster Details
-
-When using direct API, use the **full path** to this skill's `scripts/tfy-api.sh`. The path depends on which agent is installed (e.g. `~/.claude/skills/truefoundry-llm-deploy/scripts/tfy-api.sh` for Claude Code). In the examples below, replace `TFY_API_SH` with the full path.
-
-```bash
-$TFY_API_SH GET /api/svc/v1/clusters/CLUSTER_ID
-```
-
-### Extract
-
+From the cluster response, extract:
 1. **Base domains** — for public URL host construction (see Public URL section)
 2. **Available GPUs** — only present GPU types that the cluster actually supports
 
@@ -116,6 +98,8 @@ I'll help you deploy an LLM. Let me gather a few details:
 Based on the model, suggest appropriate resources. **Always check available GPUs from Step 0 first.**
 
 ### Model Size → GPU Mapping
+
+For full GPU types and DTYPE selection, see `references/gpu-reference.md`.
 
 | Model Params | Min VRAM (FP16) | Recommended GPU | CPU | Memory | Shared Memory |
 |-------------|-----------------|-----------------|-----|--------|---------------|
@@ -691,7 +675,7 @@ Use the `secrets` skill to find or create the secret group.
 
 ## Health Probes
 
-**Always include health probes for model deployments.** Without them, Kubernetes has no way to know when the model is ready and may kill pods prematurely or route traffic to unready pods.
+**Always include health probes for model deployments.** Without them, Kubernetes has no way to know when the model is ready and may kill pods prematurely or route traffic to unready pods. For general probe configuration (SDK format, API manifest format), see `references/health-probes.md`. The LLM-specific probe values below should be used instead of the general defaults.
 
 ### Why Each Probe Matters
 

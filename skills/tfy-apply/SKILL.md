@@ -31,17 +31,9 @@ Create or update TrueFoundry resources from YAML manifest files using `tfy apply
 
 1. **tfy CLI** — Must be installed and available on PATH
 2. **Credentials** — `TFY_BASE_URL` and `TFY_API_KEY` must be set (env or `.env`), or the user must have run `tfy login`
-3. **Workspace** — `TFY_WORKSPACE_FQN` is required in the manifest. Never auto-pick. Ask the user if missing.
+3. **Workspace** — `TFY_WORKSPACE_FQN` required in the manifest. **Never auto-pick. Ask the user if missing.**
 
-```bash
-# Check tfy CLI is installed
-tfy --version
-
-# Check credentials
-echo "TFY_BASE_URL: ${TFY_BASE_URL:-(not set)}"
-echo "TFY_API_KEY: ${TFY_API_KEY:+(set)}${TFY_API_KEY:-(not set)}"
-echo "TFY_WORKSPACE_FQN: ${TFY_WORKSPACE_FQN:-(not set)}"
-```
+For credential check commands and .env setup, see `references/prerequisites.md`.
 
 ### Interpret CLI Version
 
@@ -64,8 +56,6 @@ $TFY_SKILL_DIR/scripts/tfy-version.sh all
 pip install truefoundry
 tfy login --host "$TFY_BASE_URL"
 ```
-
-**If TFY_WORKSPACE_FQN is not set, STOP. Ask the user.** Suggest they use the `workspaces` skill or check the TrueFoundry dashboard.
 
 ## Basic Usage
 

@@ -52,7 +52,7 @@ SKILL_NAMES=(
 
 # Shared files (relative to _shared/ in source)
 SHARED_SCRIPTS=( "scripts/tfy-api.sh" "scripts/tfy-version.sh" )
-SHARED_REFS=( "references/api-endpoints.md" "references/deploy-template.py" "references/sdk-patterns.md" "references/sdk-version-map.md" "references/container-versions.md" )
+SHARED_REFS=( "references/api-endpoints.md" "references/deploy-template.py" "references/sdk-patterns.md" "references/sdk-version-map.md" "references/container-versions.md" "references/prerequisites.md" "references/tfy-api-setup.md" "references/gpu-reference.md" "references/cluster-discovery.md" "references/health-probes.md" "references/resource-estimation.md" )
 
 # ── Parse args ───────────────────────────────────────────────────────────────
 MODE=""            # "" = auto (global + local if applicable), "global", "local"
