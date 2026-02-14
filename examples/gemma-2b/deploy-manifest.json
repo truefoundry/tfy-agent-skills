@@ -12,7 +12,8 @@
       "expose": true,
       "protocol": "TCP",
       "app_protocol": "http",
-      "host": "gemma-2b-sai-ws.ml.tfy-eo.truefoundry.cloud"
+      "_comment": "TODO: Replace host with {service}-{workspace}.{base_domain} from your cluster",
+      "host": "gemma-2b-<workspace>.example.truefoundry.cloud"
     }
   ],
   "env": {
@@ -24,10 +25,12 @@
     "GPU_MEMORY_UTILIZATION": "0.90",
     "MODEL_NAME": "gemma-2b-vllm",
     "VLLM_CACHE_ROOT": "/opt/truefoundry/.cache/vllm",
-    "HF_TOKEN": "tfy-secret://tfy-eo:mamon-hf:hf-token",
-    "HUGGING_FACE_HUB_TOKEN": "tfy-secret://tfy-eo:mamon-hf:hf-token"
+    "_comment": "TODO: Replace with your TrueFoundry secret reference for HuggingFace token",
+    "HF_TOKEN": "tfy-secret://<base-domain>:<secret-group>:<secret-key>",
+    "HUGGING_FACE_HUB_TOKEN": "tfy-secret://<base-domain>:<secret-group>:<secret-key>"
   },
-  "workspace_fqn": "tfy-ea-dev-eo-az:sai-ws",
+  "_comment": "TODO: Replace workspace_fqn with your workspace (e.g. cluster-id:workspace-name)",
+  "workspace_fqn": "<cluster-id>:<workspace-name>",
   "artifacts_download": {
     "artifacts": [
       {
@@ -51,7 +54,8 @@
     ],
     "cache_volume": {
       "cache_size": 22,
-      "storage_class": "azureblob-nfs-premium"
+      "_comment": "TODO: Replace storage_class with your cluster's storage class (see references/cluster-discovery.md)",
+      "storage_class": "efs-sc"
     }
   },
   "replicas": 1,

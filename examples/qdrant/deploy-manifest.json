@@ -21,7 +21,9 @@
         "type": "ClusterIP"
       }
     },
-    "workspace_fqn": "tfy-ea-dev-eo-az:sai-ws"
+    "_comment": "TODO: Replace workspace_fqn with your workspace (e.g. cluster-id:workspace-name)",
+    "workspace_fqn": "<cluster-id>:<workspace-name>"
   },
-  "workspaceId": "cm18va5x91q4201rbfoijhiz9"
+  "_comment": "TODO: Replace workspaceId with your workspace ID from the TrueFoundry dashboard",
+  "workspaceId": "<your-workspace-id>"
 }

@@ -4,6 +4,13 @@ load_dotenv()
 
 from truefoundry.deploy import Service, Build, PythonBuild, LocalSource, Port, Resources
 
+WORKSPACE_FQN = os.environ.get("TFY_WORKSPACE_FQN")
+if not WORKSPACE_FQN:
+    raise SystemExit("Set TFY_WORKSPACE_FQN (e.g. 'cluster-id:workspace-name')")
+
+# TODO: Replace host with your cluster's base domain (see references/cluster-discovery.md)
+HOST = os.environ.get("TFY_DEPLOY_HOST", "fastapi-app-<workspace>.example.truefoundry.cloud")
+
 service = Service(
     name="fastapi-app",
     image=Build(
@@ -19,7 +26,7 @@ service = Service(
             port=8000,
             protocol="TCP",
             expose=True,
-            host="fastapi-app-sai-ws.ml.tfy-eo.truefoundry.cloud",
+            host=HOST,
             app_protocol="http",
         )
     ],
@@ -32,4 +39,4 @@ service = Service(
     env={},
 )
 
-service.deploy(workspace_fqn=os.environ.get("TFY_WORKSPACE_FQN", "tfy-ea-dev-eo-az:sai-ws"))
+service.deploy(workspace_fqn=WORKSPACE_FQN)

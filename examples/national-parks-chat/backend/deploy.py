@@ -19,7 +19,8 @@ service = Service(
             port=8000,
             protocol="TCP",
             expose=True,
-            host="parks-api-sai-ws.ml.tfy-eo.truefoundry.cloud",
+            # TODO: Replace with your cluster's base domain (see references/cluster-discovery.md)
+            host=os.environ.get("TFY_DEPLOY_HOST", "parks-api-<workspace>.example.truefoundry.cloud"),
             app_protocol="http",
         )
     ],
@@ -30,8 +31,12 @@ service = Service(
     ),
     replicas=1,
     env={
-        "REDIS_URL": "redis://:parksredis123@parks-redis-redis-master.sai-ws.svc.cluster.local:6379/0",
+        # TODO: Replace with your Redis deployment's internal DNS and password
+        "REDIS_URL": "redis://:YOUR_REDIS_PASSWORD@parks-redis-redis-master.<namespace>.svc.cluster.local:6379/0",
     },
 )
 
-service.deploy(workspace_fqn=os.environ.get("TFY_WORKSPACE_FQN", "tfy-ea-dev-eo-az:sai-ws"))
+WORKSPACE_FQN = os.environ.get("TFY_WORKSPACE_FQN")
+if not WORKSPACE_FQN:
+    raise SystemExit("Set TFY_WORKSPACE_FQN (e.g. 'cluster-id:workspace-name')")
+service.deploy(workspace_fqn=WORKSPACE_FQN)

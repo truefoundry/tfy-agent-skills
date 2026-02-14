@@ -38,13 +38,16 @@ service = Service(
     ),
     ports=[
         Port(port=8000, protocol="TCP", expose=True,
-             host="simple-server-sai-ws.ml.tfy-eo.truefoundry.cloud",
+             # TODO: Replace with your cluster's base domain (see references/cluster-discovery.md)
+             host=os.environ.get("TFY_DEPLOY_HOST", "simple-server-<workspace>.example.truefoundry.cloud"),
              app_protocol="http"),
     ],
     replicas=1,
 )
 
 if __name__ == "__main__":
-    workspace_fqn = "tfy-ea-dev-eo-az:sai-ws"
+    workspace_fqn = os.environ.get("TFY_WORKSPACE_FQN")
+    if not workspace_fqn:
+        raise SystemExit("Set TFY_WORKSPACE_FQN (e.g. 'cluster-id:workspace-name')")
     service.deploy(workspace_fqn=workspace_fqn, wait=False)
     print("Deployment submitted. Check the TrueFoundry dashboard for status and URL.")

@@ -19,7 +19,8 @@ service = Service(
             port=3000,
             protocol="TCP",
             expose=True,
-            host="nextjs-app-sai-ws.ml.tfy-eo.truefoundry.cloud",
+            # TODO: Replace with your cluster's base domain (see references/cluster-discovery.md)
+            host=os.environ.get("TFY_DEPLOY_HOST", "nextjs-app-<workspace>.example.truefoundry.cloud"),
             app_protocol="http",
         )
     ],
@@ -31,4 +32,7 @@ service = Service(
     replicas=1,
 )
 
-service.deploy(workspace_fqn=os.environ.get("TFY_WORKSPACE_FQN", "tfy-ea-dev-eo-az:sai-ws"))
+WORKSPACE_FQN = os.environ.get("TFY_WORKSPACE_FQN")
+if not WORKSPACE_FQN:
+    raise SystemExit("Set TFY_WORKSPACE_FQN (e.g. 'cluster-id:workspace-name')")
+service.deploy(workspace_fqn=WORKSPACE_FQN)

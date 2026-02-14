@@ -9,7 +9,8 @@
     },
     "values": {
       "auth": {
-        "postgresPassword": "demopgpass123",
+        "_comment": "TODO: Replace with a strong password or use TrueFoundry secrets",
+        "postgresPassword": "CHANGE_ME_TO_A_STRONG_PASSWORD",
         "database": "demodb"
       },
       "primary": {
@@ -24,5 +25,6 @@
       }
     }
   },
-  "workspaceId": "cm18va5x91q4201rbfoijhiz9"
+  "_comment": "TODO: Replace workspaceId with your workspace ID from the TrueFoundry dashboard",
+  "workspaceId": "<your-workspace-id>"
 }
