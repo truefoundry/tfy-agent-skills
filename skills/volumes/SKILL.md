@@ -147,16 +147,81 @@ Note: Size can be expanded later but not reduced.
 Proceed?
 ```
 
+For volumes without Volume Browser:
+```
+Volume to create:
+  Type:          Create new (dynamic)
+  Name:          training-data
+  Size:          100 GB
+  Storage class: efs-sc
+  Workspace:     my-cluster:my-workspace
+  Volume Browser: Disabled
+
+Note: Size can be expanded later but not reduced.
+Proceed?
+```
+
 ### Via Tool Call
+
+**Create new volume (without Volume Browser):**
 
 ```
 tfy_applications_create_deployment(
-    manifest={"type": "volume", "name": "my-volume", "config": {"type": "dynamic", "size": 100, "storage_class": "efs-sc"}},
+    manifest={
+        "type": "volume",
+        "name": "my-volume",
+        "config": {
+            "type": "dynamic",
+            "size": 100,
+            "storage_class": "efs-sc"
+        }
+    },
     options={"workspace_id": "ws-id-here"}
 )
 ```
 
-For Volume Browser fields and static volume tool-call examples, use the same fields as the Direct API examples below.
+**Create new volume (with Volume Browser):**
+
+```
+tfy_applications_create_deployment(
+    manifest={
+        "type": "volume",
+        "name": "my-volume",
+        "config": {
+            "type": "dynamic",
+            "size": 100,
+            "storage_class": "efs-sc"
+        },
+        "volume_browser": {
+            "username": "admin",
+            "password_secret_fqn": "my-cluster:my-workspace:vol-browser-pw",
+            "endpoint": {
+                "host": "my-cluster.example.truefoundry.com",
+                "path": "/my-volume/"
+            }
+        }
+    },
+    options={"workspace_id": "ws-id-here"}
+)
+```
+
+**Use existing PersistentVolume:**
+
+```
+tfy_applications_create_deployment(
+    manifest={
+        "type": "volume",
+        "name": "my-existing-vol",
+        "config": {
+            "type": "static",
+            "persistent_volume_name": "pv-name-in-k8s"
+        }
+    },
+    options={"workspace_id": "ws-id-here"}
+)
+```
+
+**Note:** This requires human approval (HITL) when using MCP.
 
 ### Via Direct API
 
@@ -359,7 +424,42 @@ For detailed setup instructions for AWS EFS, AWS S3, GCP GCS Fuse, and Azure Fil
 
 ## Volume Browser
 
-For Volume Browser configuration fields, setup steps, and access instructions, see `references/volume-browser-setup.md`.
+TrueFoundry provides an optional Volume Browser -- a web-based file manager UI for browsing, uploading, downloading, and managing files inside a volume without SSH access.
+
+### Volume Browser Configuration
+
+The `volume_browser` object is optional on the volume manifest. Omit it entirely to disable.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `username` | string | No | Login username for the browser UI (defaults to `admin`) |
+| `password_secret_fqn` | string | No | FQN of a TrueFoundry secret containing the browser password. Create the secret first using the `secrets` skill. Format: `cluster:workspace:secret-name` |
+| `endpoint` | object | **Yes** (if volume_browser is set) | Public endpoint where the browser will be served |
+| `endpoint.host` | string | **Yes** | Hostname (e.g. the cluster's base domain). Get available hosts from the cluster details. |
+| `endpoint.path` | string | No | URL path prefix (e.g. `/my-volume/`). Defaults to `/` |
+| `service_account` | string | No | Kubernetes ServiceAccount for the browser pod. Defaults to `default` |
+
+### Setting Up Volume Browser
+
+1. **Create a password secret** (if the user doesn't have one):
+   - Use the `secrets` skill to create a secret containing the desired password
+   - Note the secret FQN (e.g. `my-cluster:my-workspace:vol-browser-pw`)
+
+2. **Get the cluster's base domain** for the endpoint host:
+   ```bash
+   # Via MCP
+   tfy_clusters_list(cluster_id="CLUSTER_ID")
+
+   # Via Direct API
+   $TFY_API_SH GET /api/svc/v1/clusters/CLUSTER_ID
+   ```
+   Look for the cluster's base domain in the response (e.g. `my-cluster.example.truefoundry.com`).
+
+3. **Include `volume_browser` in the volume manifest** -- see API examples above in "Creating a Volume".
+
+### Volume Browser Access
+
+Once enabled, the Volume Browser is accessible at `https://{endpoint.host}{endpoint.path}`. Users log in with the configured username and password.
 
 </instructions>
 
