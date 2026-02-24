@@ -89,10 +89,10 @@ For each discovered service, determine its **type**:
 
 | Type | How to Detect | Deploy Method |
 |------|--------------|---------------|
-| **Database** | Image is `postgres`, `mysql`, `mariadb`, `mongo` | Helm chart (Bitnami) via `tfy apply` |
-| **Cache** | Image is `redis`, `memcached`, `valkey` | Helm chart (Bitnami) via `tfy apply` |
-| **Queue** | Image is `rabbitmq`, `nats`, `kafka` | Helm chart (Bitnami) via `tfy apply` |
-| **Search/Vector DB** | Image is `elasticsearch`, `qdrant`, `weaviate`, `milvus` | Helm chart or Service via `tfy apply` |
+| **Database** | Image is `postgres`, `mysql`, `mariadb`, `mongo` | Helm chart (ask user for chart source) |
+| **Cache** | Image is `redis`, `memcached`, `valkey` | Helm chart (ask user for chart source) |
+| **Queue** | Image is `rabbitmq`, `nats`, `kafka` | Helm chart (ask user for chart source) |
+| **Search/Vector DB** | Image is `elasticsearch`, `qdrant`, `weaviate`, `milvus` | Helm chart or Service |
 | **LLM** | Image contains `vllm`, `tgi`, `triton`, `ollama` | `llm-deploy` skill |
 | **Application** | Has `build:` context or custom image with code | Service deployment via `tfy apply` |
 
@@ -251,48 +251,9 @@ Each service gets its own YAML manifest file (e.g., `tfy-manifest-db.yaml`, `tfy
 
 ### For Infrastructure (Helm Charts)
 
-Use `tfy apply` with a Helm manifest. Common charts:
+Use the `helm` skill approach. All charts use `PUT /api/svc/v1/apps` with `type: "helm"`. **Ask the user for the chart source URL, chart name, and version.** Do not assume a specific chart registry.
 
-| Service | `chart_name` | Key Values |
-|---------|-------------|------------|
-| PostgreSQL | `postgresql` (v16.4.1) | `auth.postgresPassword`, `auth.database`, `primary.persistence.size: "10Gi"` |
-| Redis | `redis` (v20.6.2) | `auth.password`, `architecture: "standalone"` |
-| RabbitMQ | `rabbitmq` (v15.1.2) | `auth.username`, `auth.password` |
-| MongoDB | `mongodb` | `auth.rootUser`, `auth.rootPassword` |
-
-Example Helm manifest for PostgreSQL:
-
-```yaml
-# tfy-manifest-db.yaml
-name: myapp-db
-type: helm
-source:
-  type: oci-repo
-  version: "16.4.1"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/postgresql
-values:
-  auth:
-    postgresPassword: GENERATED_PASSWORD
-    database: myapp
-  primary:
-    persistence:
-      enabled: true
-      size: 10Gi
-    resources:
-      requests:
-        cpu: "0.5"
-        memory: 512Mi
-      limits:
-        cpu: "1"
-        memory: 1Gi
-workspace_fqn: cluster-id:workspace-name
-```
-
-```bash
-tfy apply -f tfy-manifest-db.yaml
-```
-
-Name each chart `APP_NAME-{service}` (e.g., `myapp-db`, `myapp-redis`). See the `helm` skill for full manifest examples.
+Name each chart `APP_NAME-{service}` (e.g., `myapp-db`, `myapp-redis`). See the `helm` skill for full manifest examples and source type formats (`oci-repo`, `helm-repo`, `git-helm-repo`).
 
 ### Verify Infrastructure is Running
 
@@ -307,32 +268,39 @@ $TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationName=APP
 
 Deploy each service using its own YAML manifest with wired env vars:
 
-```yaml
-# tfy-manifest-backend.yaml
-name: myapp-backend
-type: service
-image:
-  type: image
-  image_uri: PREBUILT_IMAGE_OR_REGISTRY_IMAGE
-  command: uvicorn main:app --host 0.0.0.0 --port 8000
-ports:
-  - port: 8000
-    protocol: TCP
-    expose: true
-    host: myapp-backend-ws.BASE_DOMAIN
-    app_protocol: http
-resources:
-  cpu_request: 0.5
-  cpu_limit: 1.0
-  memory_request: 512
-  memory_limit: 1024
-env:
-  DATABASE_URL: postgresql://postgres:PASSWORD@myapp-db-postgresql.NAMESPACE.svc.cluster.local:5432/DB_NAME
-  REDIS_URL: redis://:PASSWORD@myapp-redis-redis-master.NAMESPACE.svc.cluster.local:6379/0
-replicas:
-  min: 1
-  max: 1
-workspace_fqn: cluster-id:workspace-name
+```bash
+$TFY_API_SH PUT /api/svc/v1/apps '{
+  "manifest": {
+    "kind": "Service",
+    "name": "<APP_NAME>-<SERVICE_NAME>",
+    "image": {
+      "type": "image",
+      "image_uri": "<IMAGE_URI>",
+      "command": "<COMMAND>"
+    },
+    "ports": [
+      {
+        "port": <PORT>,
+        "protocol": "<PROTOCOL>",
+        "expose": <EXPOSE>,
+        "host": "<APP_NAME>-<SERVICE_NAME>-<WORKSPACE>.<BASE_DOMAIN>",
+        "app_protocol": "http"
+      }
+    ],
+    "resources": {
+      "cpu_request": <CPU_REQUEST>,
+      "cpu_limit": <CPU_LIMIT>,
+      "memory_request": <MEMORY_REQUEST>,
+      "memory_limit": <MEMORY_LIMIT>
+    },
+    "env": {
+      "DATABASE_URL": "postgresql://postgres:PASSWORD@APP_NAME-db-postgresql.NAMESPACE.svc.cluster.local:5432/DB_NAME",
+      "REDIS_URL": "redis://:PASSWORD@APP_NAME-redis-redis-master.NAMESPACE.svc.cluster.local:6379/0"
+    },
+    "replicas": { "min": <MIN_REPLICAS>, "max": <MAX_REPLICAS> }
+  },
+  "workspaceId": "WORKSPACE_ID"
+}'
 ```
 
 ```bash
@@ -418,9 +386,9 @@ The summary must include:
 See `references/compose-translation.md` for the full translation reference. Key points:
 
 - **Always scan for compose files first** before asking the user about architecture
-- `build:` services -> YAML manifest with git build source + `tfy apply`
-- `image:` services (custom) -> YAML manifest with pre-built image + `tfy apply`
-- `image:` services (postgres, redis, etc.) -> Helm manifests via `tfy apply`
+- `build:` services -> TrueFoundry Service with `DockerFileBuild`
+- `image:` services (custom) -> TrueFoundry Service with pre-built image
+- `image:` services (postgres, redis, etc.) -> Helm charts (ask user for chart source)
 - `depends_on` -> deploy order in the dependency graph
 - `healthcheck` -> TrueFoundry liveness/readiness probes in YAML
 - `volumes` -> Helm persistence or TrueFoundry Volumes

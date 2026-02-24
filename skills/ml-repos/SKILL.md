@@ -1,6 +1,6 @@
 ---
 name: ml-repos
-description: Browses TrueFoundry ML repositories and model registry. Lists repos, models, and artifacts with FQNs for use in other skills. NOT for deploying models (use llm-deploy skill).
+description: This skill should be used when the user asks "list ML repos", "show model registry", "what models do I have", "list models", "find model", "show ML repositories", "model artifacts", "browse models", "ML repo details", "model registry", "list artifacts", "show my models", "get model info", or wants to browse TrueFoundry ML repos, models, and artifacts.
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(*/tfy-api.sh *)
@@ -12,9 +12,13 @@ allowed-tools: Bash(*/tfy-api.sh *)
 
 Browse TrueFoundry ML repositories and model registry. List ML repos, get repo details, and list models/artifacts within a repo.
 
-## Scope
+## When to Use
 
-Browse ML repositories, list models and artifacts, and retrieve FQNs for use with other skills (prompts, llm-deploy).
+- User asks "list ML repos", "show model registry"
+- User wants to find a model or artifact
+- User asks "what models do I have"
+- User needs an ML repo FQN for prompts or fine-tuning
+- User wants to browse the model registry
 
 </objective>
 
@@ -28,7 +32,7 @@ When using direct API, set `TFY_API_SH` to the full path of this skill's `script
 
 ## Step 2: List ML Repos
 
-### Via Tool Call
+### Via MCP
 ```
 tfy_ml_repos_list()
 ```
@@ -52,7 +56,7 @@ ML Repos:
 
 ## Step 3: Get ML Repo Details
 
-### Via Tool Call
+### Via MCP
 ```
 tfy_ml_repos_get(id="REPO_ID")
 ```
@@ -65,7 +69,7 @@ $TFY_API_SH GET /api/ml/v1/ml-repos/REPO_ID
 
 ## Step 4: List Models in a Repo
 
-### Via Tool Call
+### Via MCP
 ```
 tfy_models_list(ml_repo_id="REPO_ID")
 ```
@@ -100,7 +104,7 @@ Models in "my-models":
 - The user can list all ML repos and see them in a formatted table
 - The user can get details for a specific ML repo by ID
 - The user can list models within a repo, filtered by repo ID, name, or FQN
-- The agent has provided FQN values that can be used with other skills (prompts, llm-deploy)
+- The agent has provided FQN values that can be used with other skills (prompts, llm-finetuning)
 
 </success_criteria>
 
@@ -110,7 +114,7 @@ Models in "my-models":
 
 - **Preflight**: Use `status` skill to verify TFY_BASE_URL and TFY_API_KEY
 - **Prompts**: ML repo FQN is needed when creating prompts (`prompts` skill)
-- **Fine-tuning**: Fine-tuned model outputs are saved to ML repos
+- **Fine-tuning**: Fine-tuned model outputs are saved to ML repos (`llm-finetuning` skill)
 - **Deploy**: Models from the registry can be deployed using `llm-deploy` skill
 
 ## API Endpoints

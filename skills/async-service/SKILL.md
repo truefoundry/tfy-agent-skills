@@ -97,19 +97,57 @@ The service connects directly to the queue through `worker_config.input_config`.
 
 **Before deploying an Async Service, ALWAYS confirm these with the user:**
 
-- [ ] **Queue type** -- SQS, NATS, Kafka, or AMQP?
-- [ ] **Queue details** -- Queue URL/topic name, credentials
-- [ ] **Service name** -- What to call this deployment
-- [ ] **Port** -- What port the service listens on
-- [ ] **Concurrent workers** -- `num_concurrent_workers` (default: 1)
-- [ ] **Resources** -- CPU, memory (defaults: cpu_request=0.2, cpu_limit=0.5, memory_request=200, memory_limit=500)
-- [ ] **Autoscaling** -- Min/max replicas, scale-to-zero?
-- [ ] **Environment** -- Dev, staging, or production?
-- [ ] **Environment variables** -- Queue credentials, app-specific config
-- [ ] **Secrets** -- Whether to mount TrueFoundry secret groups
-- [ ] **Auto-shutdown** -- Should the service auto-stop after inactivity? (useful for dev/staging to save costs)
+### Basic Configuration
+- [ ] **Service name** — What to call this deployment
+- [ ] **Pattern** — Sidecar or Python library?
+- [ ] **Environment** — Dev, staging, or production?
 
-**Do NOT deploy with hardcoded defaults without asking.**
+### Image Source
+- [ ] **Image source** — Source code (build from repo) or pre-built Docker image?
+- [ ] **If source code:**
+  - [ ] **Repo URL** — Git repository URL
+  - [ ] **Branch / SHA / Tag** — Which branch, commit SHA, or tag to build from (optional, defaults to main)
+  - [ ] **Build method** — Dockerfile or Buildpack (Python code without Dockerfile)?
+  - [ ] **Dockerfile path** — Path to Dockerfile (default: `./Dockerfile`)
+  - [ ] **Build context path** — Path to build context (default: `./`)
+  - [ ] **Build arguments** — Any Docker build args to pass (optional)
+  - [ ] **Build secrets** — Any secrets needed during build (optional)
+- [ ] **If Docker image:**
+  - [ ] **Image URI** — Full image URI (e.g., `registry/image:tag`)
+  - [ ] **Command** — Container entrypoint command
+
+### Ports & Networking (Sidecar Pattern)
+- [ ] **Port** — What port the HTTP service listens on
+- [ ] **Protocol** — HTTP or TCP (default: HTTP)
+- [ ] **Expose** — Should the port be publicly accessible? (default: no)
+- [ ] **Enable authentication** — Require TrueFoundry auth on the exposed endpoint? (only if exposed)
+- [ ] **Path suffix rewriting** — Enable rewriting to the path suffix? (optional)
+- [ ] **Endpoint path** — The POST endpoint path the sidecar forwards to (e.g., `/predict`, `/process`)
+
+### Worker Config
+- [ ] **Queue type** — SQS, NATS, Kafka, or Google AMQP?
+- [ ] **Queue details** — Queue URL/topic name, credentials
+- [ ] **Region name** — Queue region (required for SQS)
+- [ ] **Visibility timeout** — Seconds before an unacknowledged message is redelivered (required for SQS)
+- [ ] **Worker auth** — Authentication for the queue connection (optional)
+- [ ] **Output queue** — Is an output queue needed? If yes, which queue type and details?
+- [ ] **Concurrent workers** — Number of concurrent workers processing messages (default: 1)
+
+### Resources
+- [ ] **Device type** — CPU only, or GPU? If GPU, which type? (T4, A10 4GB/8GB/12GB/24GB, H100)
+- [ ] **CPU** — Request and limit (e.g., request: 0.2, limit: 0.5)
+- [ ] **Memory** — Request and limit in MB (e.g., request: 200, limit: 500)
+- [ ] **Storage** — Ephemeral storage request and limit in MB (e.g., request: 1000, limit: 2000)
+- [ ] **Capacity type** — Any, Spot, or On Demand? (default: Any)
+
+### Scaling
+- [ ] **Autoscaling** — Min/max replicas, scale-to-zero? (min=0 enables scale-to-zero)
+
+### Environment & Secrets
+- [ ] **Environment variables** — Queue credentials, app-specific config (key-value pairs or raw JSON)
+- [ ] **Secrets** — Whether to mount TrueFoundry secret groups
+
+**Do NOT deploy with hardcoded defaults without asking. Every `<PLACEHOLDER>` in the templates below MUST be replaced with a value confirmed by the user. If unsure about any field, ask — never assume.**
 
 ## Queue Configuration
 
@@ -142,46 +180,107 @@ async def health():
 
 Create a manifest using `worker_config.input_config` for queue connection:
 
-```yaml
-type: async-service
-name: my-async-worker
-image:
-  type: build
-  build_source:
-    type: git
-    repo_url: https://github.com/user/repo
-    ref: main
-  build_spec:
-    type: dockerfile
-    dockerfile_path: ./Dockerfile
-    build_context_path: ./
-    command: uvicorn server:app --host 0.0.0.0 --port 8000
-  docker_registry: my-registry
-ports:
-  - expose: true
-    port: 8000
-    protocol: TCP
-    app_protocol: http
-resources:
-  node:
-    type: node_selector
-  cpu_request: 0.2
-  cpu_limit: 0.5
-  memory_request: 200
-  memory_limit: 500
-  ephemeral_storage_request: 1000
-  ephemeral_storage_limit: 2000
-worker_config:
-  input_config:
-    type: sqs
-    queue_url: https://sqs.us-east-1.amazonaws.com/123456789/my-input-queue
-    region_name: us-east-1
-    wait_time_seconds: 19
-    visibility_timeout: 1
-  num_concurrent_workers: 1
-workspace_fqn: cluster-id:workspace-name
-replicas: 1
-env: {}
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent / ".env")
+except ImportError:
+    pass
+
+if os.environ.get("TFY_BASE_URL") and not os.environ.get("TFY_HOST"):
+    os.environ["TFY_HOST"] = os.environ["TFY_BASE_URL"].strip().rstrip("/")
+
+from truefoundry.deploy import (
+    AsyncService,
+    Build,
+    DockerFileBuild,
+    LocalSource,
+    # GitSource,            # uncomment for Git repo builds
+    # Image,                # uncomment for pre-built Docker images
+    Port,
+    Resources,
+    # NodeSelector,         # uncomment for capacity type (spot/on-demand)
+    SQSQueueConfig,       # or NATSQueueConfig, KafkaQueueConfig
+    SidecarPattern,
+    Replicas,
+    # NvidiaGPU, GPUType,  # uncomment for GPU workloads
+)
+
+PROJECT_ROOT = str(Path(__file__).resolve().parent)
+
+async_service = AsyncService(
+    name="<SERVICE_NAME>",                          # ← ask user
+    # Option A: Build from local source code
+    image=Build(
+        build_source=LocalSource(project_root_path=PROJECT_ROOT, local_build=True),
+        build_spec=DockerFileBuild(
+            dockerfile_path="<DOCKERFILE_PATH>",    # ← ask user (e.g., "./Dockerfile")
+            build_context_path="<BUILD_CONTEXT>",   # ← ask user (e.g., "./")
+            # build_args={"<ARG_NAME>": "<value>"},  # ← ask user if needed
+            # build_secrets={"<SECRET_NAME>": "<value>"},  # ← ask user if needed
+        ),
+    ),
+    # Option B: Build from Git repo (uncomment to use instead of Option A)
+    # image=Build(
+    #     build_source=GitSource(
+    #         repo_url="<REPO_URL>",                 # ← ask user
+    #         branch_name="<BRANCH>",                # ← ask user (or use ref="<COMMIT_SHA>")
+    #     ),
+    #     build_spec=DockerFileBuild(
+    #         dockerfile_path="<DOCKERFILE_PATH>",   # ← ask user
+    #         build_context_path="<BUILD_CONTEXT>",  # ← ask user
+    #     ),
+    # ),
+    # Option C: Pre-built Docker image (uncomment to use instead of Option A)
+    # image=Image(
+    #     image_uri="<IMAGE_URI>",                   # ← ask user (e.g., "registry/image:tag")
+    #     command="<ENTRYPOINT_COMMAND>",             # ← ask user
+    # ),
+    resources=Resources(
+        cpu_request=<CPU_REQUEST>,                   # ← ask user (e.g., 0.2)
+        cpu_limit=<CPU_LIMIT>,                       # ← ask user (e.g., 0.5)
+        memory_request=<MEMORY_REQUEST>,             # ← ask user, in MB (e.g., 200)
+        memory_limit=<MEMORY_LIMIT>,                 # ← ask user, in MB (e.g., 500)
+        ephemeral_storage_request=<STORAGE_REQUEST>, # ← ask user, in MB (e.g., 1000)
+        ephemeral_storage_limit=<STORAGE_LIMIT>,     # ← ask user, in MB (e.g., 2000)
+        # devices=[NvidiaGPU(name=GPUType.<GPU_TYPE>, count=<COUNT>)],  # ← ask user if GPU needed
+        # node=NodeSelector(capacity_type="<CAPACITY_TYPE>"),  # ← ask user: "any" | "spot" | "on_demand" | "spot_fallback_on_demand"
+    ),
+    ports=[
+        Port(
+            port=<PORT>,                             # ← ask user (e.g., 8000)
+            protocol="<PROTOCOL>",                   # ← ask user: "TCP" or "HTTP"
+            expose=<EXPOSE>,                         # ← ask user: True/False
+            app_protocol="http",
+        ),
+    ],
+    replicas=Replicas(
+        min=<MIN_REPLICAS>,                          # ← ask user (0 = scale-to-zero)
+        max=<MAX_REPLICAS>,                          # ← ask user
+    ),
+    sidecar=SidecarPattern(
+        destination_url="http://0.0.0.0:<PORT>/<ENDPOINT_PATH>",  # ← ask user: port + endpoint path
+    ),
+    worker_config_concurrent_workers=<CONCURRENT_WORKERS>,  # ← ask user (e.g., 1)
+    input_queue=SQSQueueConfig(
+        queue_url="<QUEUE_URL>",                     # ← ask user
+        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID", ""),
+        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY", ""),
+        aws_region="<REGION>",                       # ← ask user (e.g., "us-east-1")
+        visibility_timeout=<VISIBILITY_TIMEOUT>,     # ← ask user, in seconds (e.g., 30)
+    ),
+    # output_queue=SQSQueueConfig(...)               # ← ask user if output queue is needed
+)
+
+if __name__ == "__main__":
+    workspace_fqn = (os.environ.get("TFY_WORKSPACE_FQN") or "").strip()
+    if not workspace_fqn:
+        raise SystemExit(
+            "TFY_WORKSPACE_FQN is required. "
+            "Get it from the TrueFoundry dashboard or tfy_workspaces_list. "
+            "Do not auto-pick a workspace."
+        )
+    async_service.deploy(workspace_fqn=workspace_fqn, wait=False)
+    print("Async Service deployment submitted. Check the TrueFoundry dashboard for status.")
 ```
 
 **For pre-built images**, replace the `image` section:
@@ -263,20 +362,47 @@ If `tfy` CLI is not available, convert the YAML manifest to JSON and deploy via 
 ```
 tfy_applications_create_deployment(
     manifest={
-        "name": "my-async-worker",
+        "name": "<SERVICE_NAME>",                    # ← ask user
         "type": "async-service",
-        "image": { ... },
-        "resources": { "cpu_request": 0.2, "cpu_limit": 0.5, "memory_request": 200, "memory_limit": 500 },
-        "ports": [{"port": 8000, "protocol": "TCP", "expose": true, "app_protocol": "http"}],
-        "replicas": 1,
-        "worker_config": {
-            "input_config": { "type": "sqs", "queue_url": "...", "region_name": "us-east-1", "wait_time_seconds": 19, "visibility_timeout": 1 },
-            "num_concurrent_workers": 1
+        "image": {
+            "type": "build",
+            "build_source": {"type": "local", "project_root_path": "."},
+            "build_spec": {
+                "type": "dockerfile",
+                "dockerfile_path": "<DOCKERFILE_PATH>",    # ← ask user
+                "build_context_path": "<BUILD_CONTEXT>",   # ← ask user
+                "build_args": {},                          # ← ask user if needed
+                "build_secrets": {}                        # ← ask user if needed
+            }
         },
-        "workspace_fqn": "cluster-id:workspace-name"
+        "resources": {
+            "cpu_request": <CPU_REQUEST>,             # ← ask user
+            "cpu_limit": <CPU_LIMIT>,                 # ← ask user
+            "memory_request": <MEMORY_REQUEST>,       # ← ask user (MB)
+            "memory_limit": <MEMORY_LIMIT>,           # ← ask user (MB)
+            "ephemeral_storage_request": <STORAGE_REQUEST>,  # ← ask user (MB)
+            "ephemeral_storage_limit": <STORAGE_LIMIT>       # ← ask user (MB)
+            # "devices": [{"type": "nvidia_gpu", "name": "<GPU_TYPE>", "count": <COUNT>}]  # ← ask user if GPU needed
+            # "node": {"capacity_type": "<CAPACITY_TYPE>"}  # ← ask user: "any" | "spot" | "on_demand" | "spot_fallback_on_demand"
+        },
+        "ports": [{"port": <PORT>, "protocol": "<PROTOCOL>", "expose": <EXPOSE>, "app_protocol": "http"}],
+        "replicas": {"min": <MIN_REPLICAS>, "max": <MAX_REPLICAS>},
+        "sidecar": {
+            "destination_url": "http://0.0.0.0:<PORT>/<ENDPOINT_PATH>"  # ← ask user
+        },
+        "worker_config": {
+            "concurrent_workers": <CONCURRENT_WORKERS>  # ← ask user
+        },
+        "input_queue": {
+            "type": "<QUEUE_TYPE>",                  # ← ask user: "sqs" | "nats" | "kafka" | "google_amqp"
+            "queue_url": "<QUEUE_URL>",              # ← ask user
+            "aws_region": "<REGION>",                # ← ask user (SQS only)
+            "visibility_timeout": <VISIBILITY_TIMEOUT>  # ← ask user (SQS only, seconds)
+        },
+        "workspace_fqn": "<WORKSPACE_FQN>"           # ← ask user, never auto-pick
     },
     options={
-        "workspace_id": "ws-internal-id",
+        "workspace_id": "<WORKSPACE_ID>",            # ← from workspace FQN lookup
         "force_deploy": false
     }
 )
@@ -293,13 +419,86 @@ $TFY_API_SH GET "/api/svc/v1/workspaces?fqn=${TFY_WORKSPACE_FQN}"
 # Then deploy (JSON body)
 $TFY_API_SH PUT /api/svc/v1/apps '{
   "manifest": {
-    "name": "my-async-worker",
+    "name": "<SERVICE_NAME>",
     "type": "async-service",
-    ...
+    "image": {
+      "type": "build",
+      "build_source": {"type": "local", "project_root_path": "."},
+      "build_spec": {
+        "type": "dockerfile",
+        "dockerfile_path": "<DOCKERFILE_PATH>",
+        "build_context_path": "<BUILD_CONTEXT>",
+        "build_args": {},
+        "build_secrets": {}
+      }
+    },
+    "resources": {
+      "cpu_request": <CPU_REQUEST>,
+      "cpu_limit": <CPU_LIMIT>,
+      "memory_request": <MEMORY_REQUEST>,
+      "memory_limit": <MEMORY_LIMIT>,
+      "ephemeral_storage_request": <STORAGE_REQUEST>,
+      "ephemeral_storage_limit": <STORAGE_LIMIT>
+    },
+    "ports": [{"port": <PORT>, "protocol": "<PROTOCOL>", "expose": <EXPOSE>, "app_protocol": "http"}],
+    "replicas": {"min": <MIN_REPLICAS>, "max": <MAX_REPLICAS>},
+    "sidecar": {
+      "destination_url": "http://0.0.0.0:<PORT>/<ENDPOINT_PATH>"
+    },
+    "worker_config": {
+      "concurrent_workers": <CONCURRENT_WORKERS>
+    },
+    "input_queue": {
+      "type": "<QUEUE_TYPE>",
+      "queue_url": "<QUEUE_URL>",
+      "aws_region": "<REGION>",
+      "visibility_timeout": <VISIBILITY_TIMEOUT>
+    },
+    "workspace_fqn": "<WORKSPACE_FQN>"
   },
-  "workspaceId": "WORKSPACE_ID_HERE"
+  "workspaceId": "<WORKSPACE_ID>"
 }'
 ```
+
+> **Note (NATS):** For NATS queue configs, the actual API field names differ from SDK names:
+> - SDK `stream` → API `stream_name`
+> - SDK `subject` → API `root_subject`
+> - SDK `consumer` → API `consumer_name`
+> - SDK `input_queue` + `sidecar` → API `worker_config.input_config` + `worker_config.sidecar_config`
+> When in doubt, use the SDK deploy.py approach which handles the mapping automatically.
+
+## Deploying with the Python Library Pattern
+
+### Step 1: Install the Library
+
+```bash
+pip install truefoundry[async]
+```
+
+### Step 2: Implement the Handler
+
+```python
+# worker.py
+from truefoundry.async_service import AsyncHandler, Message
+
+class MyHandler(AsyncHandler):
+    def __init__(self):
+        # Initialize models, connections, etc.
+        pass
+
+    async def process(self, message: Message) -> dict:
+        """Process a single message from the queue."""
+        payload = message.body
+        # Your processing logic here (can take minutes)
+        result = {"status": "processed", "output": payload}
+        return result
+
+handler = MyHandler()
+```
+
+### Step 3: Deploy
+
+Use the same `deploy.py` approach as the sidecar pattern but replace `SidecarPattern` with `PythonLibraryPattern` configuration in the SDK, or set `"pattern": "python-library"` in the API manifest. The entry command should point to your worker script.
 
 ## Autoscaling and Scale-to-Zero
 

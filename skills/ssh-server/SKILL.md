@@ -63,7 +63,35 @@ tfy --version
 
 <instructions>
 
-## Launch SSH Server via `tfy apply` (CLI — Recommended)
+## User Confirmation Checklist
+
+**Before launching an SSH server, ALWAYS confirm these with the user:**
+
+### Basic Configuration
+- [ ] **Server name** — What to call this SSH server
+- [ ] **SSH public key** — User's SSH public key (required for access)
+- [ ] **Environment** — Dev, prototyping, or long-running?
+
+### Resources
+- [ ] **Device type** — CPU only, or GPU? If GPU, which type?
+- [ ] **CPU** — Request and limit
+- [ ] **Memory** — Request and limit in MB
+- [ ] **Storage** — Ephemeral storage request and limit in MB
+
+### Storage & Lifecycle
+- [ ] **Home directory size** — Persistent storage in MB for /home/jovyan/
+- [ ] **Auto-shutdown timeout** — Seconds of inactivity before auto-stop (e.g., 3600 = 1 hour)
+
+### Image
+- [ ] **Custom image** — Need pre-installed packages? (custom Dockerfile or build script)
+
+### Environment & Secrets
+- [ ] **Environment variables** — Cloud credentials, API keys, etc. (optional)
+- [ ] **Volume mounts** — Persistent volumes to attach (optional)
+
+**Do NOT launch with hardcoded defaults without asking. Every `<PLACEHOLDER>` in the templates below MUST be replaced with a value confirmed by the user. If unsure about any field, ask — never assume.**
+
+## Launch SSH Server via API
 
 ### Configuration Questions
 
@@ -145,53 +173,65 @@ When CLI is not available, use `tfy-api.sh`. Set `TFY_API_SH` to the full path o
 ```bash
 TFY_API_SH=~/.claude/skills/truefoundry-ssh-server/scripts/tfy-api.sh
 
-$TFY_API_SH PUT /api/svc/v1/apps -d '{
-  "name": "my-ssh-server",
-  "type": "ssh-server",
-  "image": {
-    "image_uri": "public.ecr.aws/truefoundrycloud/ssh-server:0.4.5-py3.12.12"
+$TFY_API_SH PUT /api/svc/v1/apps '{
+  "manifest": {
+    "name": "<SERVER_NAME>",
+    "type": "ssh-server",
+    "image": {
+      "type": "image",
+      "image_uri": "public.ecr.aws/truefoundrycloud/ssh-server:latest"
+    },
+    "resources": {
+      "cpu_request": <CPU_REQUEST>,
+      "cpu_limit": <CPU_LIMIT>,
+      "memory_request": <MEMORY_REQUEST>,
+      "memory_limit": <MEMORY_LIMIT>,
+      "ephemeral_storage_request": <STORAGE_REQUEST>,
+      "ephemeral_storage_limit": <STORAGE_LIMIT>
+    },
+    "ssh_public_key": "<SSH_PUBLIC_KEY>",
+    "home_directory_size": <HOME_DIR_SIZE>,
+    "cull_timeout": <CULL_TIMEOUT>,
+    "workspace_fqn": "WORKSPACE_FQN"
   },
-  "home_directory_size": 20,
-  "resources": {
-    "node": {"type": "node_selector", "capacity_type": "on_demand"},
-    "cpu_request": 1,
-    "cpu_limit": 3,
-    "memory_request": 4000,
-    "memory_limit": 6000,
-    "ephemeral_storage_request": 5000,
-    "ephemeral_storage_limit": 10000
-  },
-  "workspace_fqn": "WORKSPACE_FQN"
+  "workspaceId": "WORKSPACE_ID_HERE"
 }'
 ```
 
 ### GPU SSH Server (REST API)
 
 ```bash
-$TFY_API_SH PUT /api/svc/v1/apps -d '{
-  "name": "gpu-dev-server",
-  "type": "ssh-server",
-  "image": {
-    "image_uri": "public.ecr.aws/truefoundrycloud/ssh-server:0.4.5-cu129-py3.12.12"
+$TFY_API_SH PUT /api/svc/v1/apps '{
+  "manifest": {
+    "name": "<SERVER_NAME>",
+    "type": "ssh-server",
+    "image": {
+      "type": "image",
+      "image_uri": "public.ecr.aws/truefoundrycloud/ssh-server:latest"
+    },
+    "resources": {
+      "cpu_request": <CPU_REQUEST>,
+      "cpu_limit": <CPU_LIMIT>,
+      "memory_request": <MEMORY_REQUEST>,
+      "memory_limit": <MEMORY_LIMIT>,
+      "ephemeral_storage_request": <STORAGE_REQUEST>,
+      "ephemeral_storage_limit": <STORAGE_LIMIT>,
+      "devices": [
+        {"type": "nvidia_gpu", "name": "<GPU_TYPE>", "count": <GPU_COUNT>}
+      ]
+    },
+    "ssh_public_key": "<SSH_PUBLIC_KEY>",
+    "home_directory_size": <HOME_DIR_SIZE>,
+    "cull_timeout": <CULL_TIMEOUT>,
+    "workspace_fqn": "WORKSPACE_FQN"
   },
-  "home_directory_size": 20,
-  "resources": {
-    "node": {"type": "node_selector", "capacity_type": "on_demand"},
-    "cpu_request": 4,
-    "cpu_limit": 8,
-    "memory_request": 16000,
-    "memory_limit": 32000,
-    "ephemeral_storage_request": 10000,
-    "ephemeral_storage_limit": 20000,
-    "devices": [
-      {"type": "nvidia_gpu", "name": "A10_24GB", "count": 1}
-    ]
-  },
-  "workspace_fqn": "WORKSPACE_FQN"
+  "workspaceId": "WORKSPACE_ID_HERE"
 }'
 ```
 
 ## SSH Key Setup
+
+**Note:** The `ssh_public_key` field is required in the API manifest. The SSH server will not be accessible without it.
 
 ### Prerequisites
 
@@ -270,7 +310,7 @@ rsync -avz <deploymentName>:<remote-path> <local-path>
 
 ## Scale-to-Zero
 
-SSH servers may auto-stop after inactivity to save costs.
+SSH servers auto-stop after inactivity to save costs. Configure via `cull_timeout` in seconds (e.g., `3600` for 1 hour).
 
 **Activity detection**: Active SSH connections and foreground applications.
 **Not detected**: Background processes.

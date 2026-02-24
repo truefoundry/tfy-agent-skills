@@ -63,7 +63,36 @@ The fastest way is through the TrueFoundry dashboard:
 2. Select workspace and configure resources
 3. Click Deploy
 
-## Launch Notebook via `tfy apply` (CLI — Recommended)
+## User Confirmation Checklist
+
+**Before launching a notebook, ALWAYS confirm these with the user:**
+
+### Basic Configuration
+- [ ] **Notebook name** — What to call this notebook
+- [ ] **Environment** — Dev, prototyping, or production research?
+
+### Image
+- [ ] **Python version** — 3.10, 3.11, or 3.12?
+- [ ] **GPU needed?** — If yes, use CUDA image variant
+- [ ] **Custom image** — Does the user need pre-installed packages? (custom Dockerfile or build script)
+
+### Resources
+- [ ] **Device type** — CPU only, or GPU? If GPU, which type? (T4, A10, H100, etc.)
+- [ ] **CPU** — Request and limit
+- [ ] **Memory** — Request and limit in MB
+- [ ] **Storage** — Ephemeral storage request and limit in MB
+
+### Storage & Lifecycle
+- [ ] **Home directory size** — Persistent storage in MB for /home/jovyan/
+- [ ] **Auto-shutdown timeout** — Seconds of inactivity before auto-stop (e.g., 1800 = 30 min)
+
+### Environment & Secrets
+- [ ] **Environment variables** — Cloud credentials, API keys, etc. (optional)
+- [ ] **Volume mounts** — Persistent volumes to attach (optional)
+
+**Do NOT launch with hardcoded defaults without asking. Every `<PLACEHOLDER>` in the templates below MUST be replaced with a value confirmed by the user. If unsure about any field, ask — never assume.**
+
+## Launch Notebook via API
 
 ### Configuration Questions
 
@@ -147,51 +176,57 @@ When CLI is not available, use `tfy-api.sh`. Set `TFY_API_SH` to the full path o
 ```bash
 TFY_API_SH=~/.claude/skills/truefoundry-notebooks/scripts/tfy-api.sh
 
-$TFY_API_SH PUT /api/svc/v1/apps -d '{
-  "name": "my-notebook",
-  "type": "notebook",
-  "image": {
-    "image_uri": "public.ecr.aws/truefoundrycloud/jupyter:0.4.5-py3.12.12-sudo"
+$TFY_API_SH PUT /api/svc/v1/apps '{
+  "manifest": {
+    "name": "<NOTEBOOK_NAME>",                        # ← ask user
+    "type": "notebook",
+    "image": {
+      "type": "image",
+      "image_uri": "<IMAGE_URI>"                      # ← ask user (see Available Base Images)
+    },
+    "resources": {
+      "cpu_request": <CPU_REQUEST>,                   # ← ask user
+      "cpu_limit": <CPU_LIMIT>,                       # ← ask user
+      "memory_request": <MEMORY_REQUEST>,             # ← ask user (in MB)
+      "memory_limit": <MEMORY_LIMIT>,                 # ← ask user (in MB)
+      "ephemeral_storage_request": <STORAGE_REQUEST>, # ← ask user (in MB)
+      "ephemeral_storage_limit": <STORAGE_LIMIT>      # ← ask user (in MB)
+    },
+    "home_directory_size": <HOME_DIR_SIZE>,            # ← ask user (in MB)
+    "cull_timeout": <CULL_TIMEOUT>,                    # ← ask user (in seconds)
+    "workspace_fqn": "<WORKSPACE_FQN>"                # ← ask user
   },
-  "home_directory_size": 20,
-  "cull_timeout": 30,
-  "resources": {
-    "node": {"type": "node_selector", "capacity_type": "on_demand"},
-    "cpu_request": 1,
-    "cpu_limit": 3,
-    "memory_request": 4000,
-    "memory_limit": 6000,
-    "ephemeral_storage_request": 5000,
-    "ephemeral_storage_limit": 10000
-  },
-  "workspace_fqn": "WORKSPACE_FQN"
+  "workspaceId": "<WORKSPACE_ID>"                     # ← ask user
 }'
 ```
 
 ### GPU Notebook (REST API)
 
 ```bash
-$TFY_API_SH PUT /api/svc/v1/apps -d '{
-  "name": "gpu-notebook",
-  "type": "notebook",
-  "image": {
-    "image_uri": "public.ecr.aws/truefoundrycloud/jupyter:0.4.5-py3.12.12-sudo"
+$TFY_API_SH PUT /api/svc/v1/apps '{
+  "manifest": {
+    "name": "<NOTEBOOK_NAME>",                        # ← ask user
+    "type": "notebook",
+    "image": {
+      "type": "image",
+      "image_uri": "<CUDA_IMAGE_URI>"                 # ← ask user (must be cu129-* variant)
+    },
+    "resources": {
+      "cpu_request": <CPU_REQUEST>,                   # ← ask user
+      "cpu_limit": <CPU_LIMIT>,                       # ← ask user
+      "memory_request": <MEMORY_REQUEST>,             # ← ask user (in MB)
+      "memory_limit": <MEMORY_LIMIT>,                 # ← ask user (in MB)
+      "ephemeral_storage_request": <STORAGE_REQUEST>, # ← ask user (in MB)
+      "ephemeral_storage_limit": <STORAGE_LIMIT>,     # ← ask user (in MB)
+      "devices": [
+        {"type": "nvidia_gpu", "name": "<GPU_TYPE>", "count": <GPU_COUNT>}  # ← ask user
+      ]
+    },
+    "home_directory_size": <HOME_DIR_SIZE>,            # ← ask user (in MB)
+    "cull_timeout": <CULL_TIMEOUT>,                    # ← ask user (in seconds)
+    "workspace_fqn": "<WORKSPACE_FQN>"                # ← ask user
   },
-  "home_directory_size": 20,
-  "cull_timeout": 30,
-  "resources": {
-    "node": {"type": "node_selector", "capacity_type": "on_demand"},
-    "cpu_request": 4,
-    "cpu_limit": 8,
-    "memory_request": 16000,
-    "memory_limit": 32000,
-    "ephemeral_storage_request": 10000,
-    "ephemeral_storage_limit": 20000,
-    "devices": [
-      {"type": "nvidia_gpu", "name": "T4", "count": 1}
-    ]
-  },
-  "workspace_fqn": "WORKSPACE_FQN"
+  "workspaceId": "<WORKSPACE_ID>"                     # ← ask user
 }'
 ```
 
@@ -211,9 +246,9 @@ See `references/container-versions.md` for latest versions.
 
 ## Auto-Shutdown (Scale-to-Zero)
 
-Notebooks auto-stop after inactivity to save costs. Default: 30 minutes.
+Notebooks auto-stop after inactivity to save costs. Default: 1800 seconds (30 minutes).
 
-Configure `cull_timeout` in minutes in the manifest (default: 30). Set to `0` to disable auto-shutdown.
+Configure `cull_timeout` in seconds in the manifest (e.g., `1800` for 30 minutes, `3600` for 1 hour).
 
 **What counts as activity**: Active Jupyter sessions, running cells, terminal sessions.
 **What doesn't count**: Background processes, idle kernels.

@@ -1,6 +1,6 @@
 ---
 name: tracing
-description: Adds OpenTelemetry-based tracing to applications via TrueFoundry's tracing platform (Traceloop SDK). Creates tracing projects, instruments Python/TypeScript code, and captures LLM calls and custom spans. NOT for deploying services.
+description: This skill should be used when the user asks "add tracing", "set up tracing", "instrument my app", "trace LLM calls", "create tracing project", "add observability", "monitor LLM calls", "OpenTelemetry setup", "traceloop setup", "add telemetry", "trace my application", "LLM observability", "track model calls", "instrument with traceloop", "create tracing app", or wants to add tracing/observability to their application using TrueFoundry's tracing platform.
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(*/tfy-api.sh *) Bash(pip*) Bash(npm*)
@@ -14,7 +14,11 @@ Add OpenTelemetry-based tracing and observability to applications using TrueFoun
 
 ## When to Use
 
-Set up tracing projects, install Traceloop SDK, and instrument Python or TypeScript applications for LLM call tracing and observability on TrueFoundry.
+- User asks "add tracing to my app", "instrument my code"
+- User wants to trace LLM calls (OpenAI, Anthropic, etc.)
+- User asks to create a tracing project on TrueFoundry
+- User wants observability for their AI/ML application
+- User mentions Traceloop, OpenTelemetry, or LLM monitoring
 
 </objective>
 
@@ -32,7 +36,7 @@ Ask the user: **"Do you already have a tracing project FQN, or should I create o
 
 ### List Existing Projects
 
-#### Via Tool Call
+#### Via MCP
 ```
 tfy_tracing_list_projects()
 ```
@@ -49,7 +53,7 @@ $TFY_API_SH GET /api/ml/v1/tracing-projects
 
 Ask for a project name, then create:
 
-#### Via Tool Call
+#### Via MCP
 ```
 tfy_tracing_create_project(name="my-tracing-project")
 ```
@@ -66,7 +70,7 @@ Save the returned project `id` for the next step.
 
 Each tracing project can have multiple applications (e.g., "chatbot", "rag-pipeline").
 
-#### Via Tool Call
+#### Via MCP
 ```
 tfy_tracing_create_application(project_id="PROJECT_ID", name="my-app")
 ```

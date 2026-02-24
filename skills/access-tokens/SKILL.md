@@ -1,6 +1,6 @@
 ---
 name: access-tokens
-description: Manages TrueFoundry personal access tokens (PATs). List, create, and delete tokens for API auth, CI/CD, and gateway access.
+description: This skill should be used when the user asks "list access tokens", "create API key", "generate access token", "show my tokens", "personal access token", "create PAT", "delete token", "manage API keys", "revoke token", "new API key", "truefoundry token", "CI/CD token", "generate TFY key", or wants to manage TrueFoundry personal access tokens.
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(*/tfy-api.sh *)
@@ -14,7 +14,11 @@ Manage TrueFoundry personal access tokens (PATs). List, create, and delete token
 
 ## When to Use
 
-List, create, or delete personal access tokens for API authentication, CI/CD pipelines, or AI Gateway access.
+- User asks "list my access tokens", "show my API keys"
+- User wants to create a new API key for CI/CD
+- User asks "generate a token for the gateway"
+- User wants to revoke or delete a token
+- User needs a PAT for automated deployments or gitops
 
 </objective>
 
@@ -28,7 +32,7 @@ When using direct API, set `TFY_API_SH` to the full path of this skill's `script
 
 ## Step 2: List Access Tokens
 
-### Via Tool Call
+### Via MCP
 ```
 tfy_access_tokens_list()
 ```
@@ -56,12 +60,12 @@ Personal Access Tokens:
 
 Ask the user for a token name before creating.
 
-### Via Tool Call
+### Via MCP
 ```
 tfy_access_tokens_create(payload={"name": "my-token"})
 ```
 
-**Note:** Requires human approval (HITL) via tool call.
+**Note:** Requires human approval (HITL) via MCP.
 
 ### Via Direct API
 ```bash
@@ -84,12 +88,12 @@ Token: tfy-XXXXXXXXXXXXXXXXXXXXXXXX
 
 Ask for confirmation before deleting — this is irreversible and will break any integrations using the token.
 
-### Via Tool Call
+### Via MCP
 ```
 tfy_access_tokens_delete(id="TOKEN_ID")
 ```
 
-**Note:** Requires human approval (HITL) via tool call.
+**Note:** Requires human approval (HITL) via MCP.
 
 ### Via Direct API
 ```bash
