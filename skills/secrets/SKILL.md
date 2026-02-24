@@ -14,7 +14,13 @@ Manage TrueFoundry secret groups and secrets. Secret groups organize secrets; in
 
 ## When to Use
 
-List, create, update, or delete secret groups and individual secrets on TrueFoundry, including pre-deploy secret setup and value rotation.
+- User asks "list secrets", "show secret groups"
+- User wants to create a secret group
+- User asks "what secrets are in this group"
+- User wants to get a specific secret value
+- User wants to update a secret, rotate secret values
+- User wants to delete a secret or remove a secret group
+- Setting up secrets before a deploy
 
 </objective>
 
@@ -83,13 +89,13 @@ $TFY_API_SH POST /api/svc/v1/secret-groups '{"name":"my-secrets","integrationId"
 
 Updates secrets in a group. A new version is created for every secret with a modified value. Secrets omitted from the array are deleted. At least one secret is required.
 
-### Via Tool Call
+### Via MCP
 
 ```
 tfy_secret_groups_update(id="GROUP_ID", payload={"secrets": [{"key": "DB_PASSWORD", "value": "new-value"}, {"key": "API_KEY", "value": "new-key"}]})
 ```
 
-**Note:** Requires human approval (HITL) via tool call.
+**Note:** Requires human approval (HITL) via MCP.
 
 ### Via Direct API
 
@@ -99,13 +105,13 @@ $TFY_API_SH PUT /api/svc/v1/secret-groups/GROUP_ID '{"secrets":[{"key":"DB_PASSW
 
 ## Delete Secret Group
 
-### Via Tool Call
+### Via MCP
 
 ```
 tfy_secret_groups_delete(id="GROUP_ID")
 ```
 
-**Note:** Requires human approval (HITL) via tool call.
+**Note:** Requires human approval (HITL) via MCP.
 
 ### Via Direct API
 
@@ -115,13 +121,13 @@ $TFY_API_SH DELETE /api/svc/v1/secret-groups/GROUP_ID
 
 ## Delete Individual Secret
 
-### Via Tool Call
+### Via MCP
 
 ```
 tfy_secrets_delete(id="SECRET_ID")
 ```
 
-**Note:** Requires human approval (HITL) via tool call.
+**Note:** Requires human approval (HITL) via MCP.
 
 ### Via Direct API
 
