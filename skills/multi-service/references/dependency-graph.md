@@ -1,6 +1,6 @@
 # DAG Construction & Circular Dependency Detection
 
-## Table of Contents
+## Contents
 
 - [Sources of Dependency Information](#sources-of-dependency-information)
 - [Dependency Rules](#dependency-rules)

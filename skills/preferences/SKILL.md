@@ -172,7 +172,7 @@ mkdir -p ~/.config/truefoundry
 
 | Key | Type | What It Controls | Used By Skills |
 |-----|------|-----------------|----------------|
-| `workspace_fqn` | string | Default deploy target | deploy, multi-service, helm, llm-deploy, mcp-server |
+| `workspace_fqn` | string | Default deploy target | deploy, multi-service, helm, llm-deploy |
 | `environment` | string | dev/staging/prod — affects resources and naming | deploy, multi-service |
 | `resources.dev` | object | CPU/memory defaults for dev deployments | deploy, multi-service |
 | `resources.prod` | object | CPU/memory defaults for prod deployments | deploy, multi-service |

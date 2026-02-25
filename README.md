@@ -29,7 +29,7 @@ Example workflow:
 | **LLM & AI** | [llm-deploy](skills/llm-deploy/SKILL.md), [llm-finetuning](skills/llm-finetuning/SKILL.md), [llm-benchmarking](skills/llm-benchmarking/SKILL.md), [ai-gateway](skills/ai-gateway/SKILL.md) |
 | **Infrastructure** | [helm](skills/helm/SKILL.md), [volumes](skills/volumes/SKILL.md), [secrets](skills/secrets/SKILL.md) |
 | **Jobs & Async** | [jobs](skills/jobs/SKILL.md), [workflows](skills/workflows/SKILL.md), [async-service](skills/async-service/SKILL.md) |
-| **Dev Environments** | [notebooks](skills/notebooks/SKILL.md), [ssh-server](skills/ssh-server/SKILL.md), [mcp-server](skills/mcp-server/SKILL.md) |
+| **Dev Environments** | [notebooks](skills/notebooks/SKILL.md), [ssh-server](skills/ssh-server/SKILL.md) |
 | **Observe & Test** | [logs](skills/logs/SKILL.md), [service-test](skills/service-test/SKILL.md), [applications](skills/applications/SKILL.md) |
 | **Utility** | [status](skills/status/SKILL.md), [workspaces](skills/workspaces/SKILL.md), [prompts](skills/prompts/SKILL.md), [docs](skills/docs/SKILL.md), [preferences](skills/preferences/SKILL.md) |
 

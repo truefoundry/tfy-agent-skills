@@ -25,7 +25,6 @@ Available skills in this repo:
 - `llm-deploy`
 - `llm-finetuning`
 - `logs`
-- `mcp-server`
 - `multi-service`
 - `notebooks`
 - `preferences`

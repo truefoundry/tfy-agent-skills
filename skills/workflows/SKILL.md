@@ -114,57 +114,28 @@ def ml_pipeline(source: str = "default") -> str:
 
 ## Task Configuration
 
-### PythonTaskConfig
-
-Every task needs a `PythonTaskConfig` that defines its execution environment:
+Every task needs a `PythonTaskConfig` defining its execution environment:
 
 ```python
 from truefoundry.workflow import PythonTaskConfig, TaskPythonBuild
 from truefoundry.deploy import Resources
 
-# CPU task
-cpu_task_config = PythonTaskConfig(
+task_config = PythonTaskConfig(
     image=TaskPythonBuild(
-        python_version="<PYTHON_VERSION>",           # ← ask user
-        pip_packages=[
-            "truefoundry[workflow]",
-            # ← ask user for required packages
-        ],
+        python_version="3.11",
+        pip_packages=["truefoundry[workflow]"],  # + user's packages
     ),
     resources=Resources(
-        cpu_request=<CPU_REQUEST>,                   # ← ask user
-        cpu_limit=<CPU_LIMIT>,                       # ← ask user
-        memory_request=<MEMORY_REQUEST>,             # ← ask user (MB)
-        memory_limit=<MEMORY_LIMIT>,                 # ← ask user (MB)
-    ),
-)
-
-# GPU task (for training or inference steps)
-gpu_task_config = PythonTaskConfig(
-    image=TaskPythonBuild(
-        python_version="<PYTHON_VERSION>",           # ← ask user
-        pip_packages=[
-            "truefoundry[workflow]",
-            # ← ask user for required packages
-        ],
-    ),
-    resources=Resources(
-        cpu_request=<CPU_REQUEST>,                   # ← ask user
-        cpu_limit=<CPU_LIMIT>,                       # ← ask user
-        memory_request=<MEMORY_REQUEST>,             # ← ask user (MB)
-        memory_limit=<MEMORY_LIMIT>,                 # ← ask user (MB)
-        devices=[
-            GPUDevice(name="<GPU_TYPE>", count=<GPU_COUNT>),  # ← ask user
-        ],
+        cpu_request=0.5, cpu_limit=1.0,
+        memory_request=512, memory_limit=1024,  # in MB
     ),
 )
 ```
 
 **Key points:**
-- `truefoundry[workflow]` must always be in `pip_packages` (or in the requirements file)
-- `pip_packages` takes a list of pip-installable package specifiers
-- `requirements_path` can point to a requirements file instead of inline packages
-- Resource `memory_request` and `memory_limit` are in MB
+- `truefoundry[workflow]` must always be in `pip_packages`
+- Use `requirements_path` instead of inline `pip_packages` for large dependency lists
+- For GPU tasks, add `devices=[GPUDevice(name="<GPU_TYPE>", count=1)]` to Resources
 - Different tasks can have different configs (e.g., lightweight preprocessing vs GPU-heavy training)
 
 ### Container Tasks
@@ -421,21 +392,8 @@ data plane components on the target cluster.
 
 ### Business Logic in Workflow Function
 ```
-Error: Workflow function contains non-task code.
 The @workflow function must only contain task calls and control flow.
-Move all computation into @task-decorated functions.
-
-Bad:
-  @workflow
-  def my_wf():
-      data = pd.read_csv("file.csv")  # NOT allowed in workflow function
-      return process(data)
-
-Good:
-  @workflow
-  def my_wf():
-      data = load_data()              # Call a @task instead
-      return process(data)
+Move all computation (imports, data loading, processing) into @task-decorated functions.
 ```
 
 ### Missing truefoundry[workflow] in Task Packages

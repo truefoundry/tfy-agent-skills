@@ -149,65 +149,14 @@ Proceed?
 
 ### Via MCP
 
-**Create new volume (without Volume Browser):**
-
 ```
 tfy_applications_create_deployment(
-    manifest={
-        "type": "volume",
-        "name": "my-volume",
-        "config": {
-            "type": "dynamic",
-            "size": 100,
-            "storage_class": "efs-sc"
-        }
-    },
+    manifest={"type": "volume", "name": "my-volume", "config": {"type": "dynamic", "size": 100, "storage_class": "efs-sc"}},
     options={"workspace_id": "ws-id-here"}
 )
 ```
 
-**Create new volume (with Volume Browser):**
-
-```
-tfy_applications_create_deployment(
-    manifest={
-        "type": "volume",
-        "name": "my-volume",
-        "config": {
-            "type": "dynamic",
-            "size": 100,
-            "storage_class": "efs-sc"
-        },
-        "volume_browser": {
-            "username": "admin",
-            "password_secret_fqn": "my-cluster:my-workspace:vol-browser-pw",
-            "endpoint": {
-                "host": "my-cluster.example.truefoundry.com",
-                "path": "/my-volume/"
-            }
-        }
-    },
-    options={"workspace_id": "ws-id-here"}
-)
-```
-
-**Use existing PersistentVolume:**
-
-```
-tfy_applications_create_deployment(
-    manifest={
-        "type": "volume",
-        "name": "my-existing-vol",
-        "config": {
-            "type": "static",
-            "persistent_volume_name": "pv-name-in-k8s"
-        }
-    },
-    options={"workspace_id": "ws-id-here"}
-)
-```
-
-**Note:** This requires human approval (HITL) when using MCP.
+For Volume Browser fields and static volume MCP examples, use the same fields as the Direct API examples below.
 
 ### Via Direct API
 
@@ -445,54 +394,14 @@ For Volume Browser configuration fields, setup steps, and access instructions, s
 
 ## Error Handling
 
-### Volume Not Found
-```
-Volume not found in workspace. Check:
-- Volume name and workspace FQN are correct
-- Volume was created in the same workspace as your application
-- Use: GET /api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationType=volume
-```
-
-### Storage Class Not Available
-```
-Storage class not found on this cluster. Check available storage classes:
-- GET /api/svc/v1/clusters/CLUSTER_ID
-- Common classes: efs-sc (AWS), standard-rwx (GCP), azurefile (Azure)
-- Ask your platform admin if no storage classes are configured.
-```
-
-### Volume Size Cannot Be Reduced
-```
-Volume size can only be increased, not decreased.
-Current size: 100Gi. You requested: 50Gi.
-To use less storage, create a new smaller volume and migrate data.
-```
-
-### Workspace Mismatch
-```
-Volume and application must be in the same workspace.
-Volume workspace: my-cluster:ws-a
-Application workspace: my-cluster:ws-b
-Create the volume in the same workspace as your application, or redeploy the application to the volume's workspace.
-```
-
-### Permission Denied
-```
-Cannot access or create volumes. Check your API key permissions for this workspace.
-```
-
-### PersistentVolume Not Found (Static Volumes)
-```
-The Kubernetes PersistentVolume name you specified does not exist in the cluster.
-Verify the PV exists: kubectl get pv <pv-name>
-If you need to create it, contact your platform administrator.
-```
-
-### Data Corruption Warning
-```
-Multiple pods writing to the same file path can cause data corruption.
-Ensure each pod writes to a unique sub-directory, or use a single-writer pattern.
-Example: /data/pod-{POD_NAME}/ for per-pod directories.
-```
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Volume not found | Wrong name or workspace | Verify FQN; volumes are workspace-scoped |
+| Storage class not available | Cluster missing provisioner | Check `GET /api/svc/v1/clusters/CLUSTER_ID` for available classes |
+| Size cannot be reduced | PVC limitation | Create new smaller volume and migrate data |
+| Workspace mismatch | Volume in different workspace | Create volume in same workspace as the app |
+| Permission denied | API key lacks access | Check API key permissions for this workspace |
+| PV not found (static) | K8s PV doesn't exist | Verify with `kubectl get pv <pv-name>` |
+| Data corruption | Multiple pods writing same path | Use per-pod sub-directories (e.g., `/data/pod-{POD_NAME}/`) |
 
 </troubleshooting>
