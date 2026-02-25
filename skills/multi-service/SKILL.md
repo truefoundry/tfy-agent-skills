@@ -178,7 +178,8 @@ For each discovered service, determine its **type**:
 | **Queue** | Image is `rabbitmq`, `nats`, `kafka` | Helm chart (ask user for chart source) |
 | **Search/Vector DB** | Image is `elasticsearch`, `qdrant`, `weaviate`, `milvus` | Helm chart or Service |
 | **LLM** | Image contains `vllm`, `tgi`, `triton`, `ollama` | `llm-deploy` skill |
-| **Application** | Has `build:` context or custom image with code | Service deployment via `tfy apply` |
+| **MCP Server** | Exposes `/mcp` endpoint, uses MCP protocol | `deploy` skill (service with mcp-proxy) |
+| **Application** | Has `build:` context or custom image with code | Service deployment |
 
 ## Step 2: Build Dependency Graph
 
@@ -428,6 +429,7 @@ This skill orchestrates other skills:
 - **Infrastructure**: Uses `helm` skill patterns for databases, caches, queues
 - **Services**: Uses `deploy` skill patterns for application services
 - **LLMs**: Uses `llm-deploy` skill patterns if the app includes model serving
+- **MCP Servers**: Uses `deploy` skill for MCP servers (service with mcp-proxy wrapper)
 - **Secrets**: Uses `secrets` skill to create shared credential groups
 - **Workspaces**: Uses `workspaces` skill to get workspace FQN and namespace
 - **Verification**: Uses `applications` skill to check status, `logs` skill to debug, `service-test` skill to validate endpoints

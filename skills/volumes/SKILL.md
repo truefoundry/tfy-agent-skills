@@ -163,65 +163,14 @@ Proceed?
 
 ### Via Tool Call
 
-**Create new volume (without Volume Browser):**
-
 ```
 tfy_applications_create_deployment(
-    manifest={
-        "type": "volume",
-        "name": "my-volume",
-        "config": {
-            "type": "dynamic",
-            "size": 100,
-            "storage_class": "efs-sc"
-        }
-    },
+    manifest={"type": "volume", "name": "my-volume", "config": {"type": "dynamic", "size": 100, "storage_class": "efs-sc"}},
     options={"workspace_id": "ws-id-here"}
 )
 ```
 
-**Create new volume (with Volume Browser):**
-
-```
-tfy_applications_create_deployment(
-    manifest={
-        "type": "volume",
-        "name": "my-volume",
-        "config": {
-            "type": "dynamic",
-            "size": 100,
-            "storage_class": "efs-sc"
-        },
-        "volume_browser": {
-            "username": "admin",
-            "password_secret_fqn": "my-cluster:my-workspace:vol-browser-pw",
-            "endpoint": {
-                "host": "my-cluster.example.truefoundry.com",
-                "path": "/my-volume/"
-            }
-        }
-    },
-    options={"workspace_id": "ws-id-here"}
-)
-```
-
-**Use existing PersistentVolume:**
-
-```
-tfy_applications_create_deployment(
-    manifest={
-        "type": "volume",
-        "name": "my-existing-vol",
-        "config": {
-            "type": "static",
-            "persistent_volume_name": "pv-name-in-k8s"
-        }
-    },
-    options={"workspace_id": "ws-id-here"}
-)
-```
-
-**Note:** This requires human approval (HITL) when using MCP.
+For Volume Browser fields and static volume MCP examples, use the same fields as the Direct API examples below.
 
 ### Via Direct API
 

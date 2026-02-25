@@ -179,89 +179,47 @@ Based on the job requirements, create a YAML manifest.
 
 #### Option A: Pre-built Image
 
-```yaml
-name: my-batch-job
-type: job
-image:
-  type: image
-  image_uri: my-registry/my-image:latest
-  command: python train.py
-resources:
-  cpu_request: 2
-  cpu_limit: 4
-  memory_request: 4000
-  memory_limit: 8000
-  ephemeral_storage_request: 1000
-  ephemeral_storage_limit: 2000
-env:
-  ENVIRONMENT: production
-workspace_fqn: cluster-id:workspace-name
-```
+```python
+from truefoundry.deploy import Build, Job, PythonBuild, Resources, LocalSource, DockerFileBuild, Image
 
-# Option A: From local code with PythonBuild
+# Option A: PythonBuild (local code, no Dockerfile)
 job = Job(
-    name="<JOB_NAME>",                              # ← confirmed with user
+    name="<JOB_NAME>",
     image=Build(
         build_source=LocalSource(local_build=False),
         build_spec=PythonBuild(
-            command="<COMMAND>",                     # ← auto-detected, confirmed
-            python_version="<PYTHON_VERSION>",       # ← default 3.11
-            requirements_path="<REQUIREMENTS_PATH>", # ← auto-detected
+            command="<COMMAND>",
+            python_version="3.11",
+            requirements_path="requirements.txt",
         ),
     ),
     resources=Resources(
-        cpu_request=<CPU_REQUEST>,                   # ← from resource suggestion table
-        cpu_limit=<CPU_LIMIT>,                       # ← from resource suggestion table
-        memory_request=<MEMORY_REQUEST>,             # ← from resource suggestion table
-        memory_limit=<MEMORY_LIMIT>,                 # ← from resource suggestion table
-        ephemeral_storage_request=<STORAGE_REQUEST>, # ← from resource suggestion table
-        ephemeral_storage_limit=<STORAGE_LIMIT>,     # ← from resource suggestion table
+        cpu_request=0.5, cpu_limit=1.0,
+        memory_request=512, memory_limit=1024,
+        ephemeral_storage_request=1000, ephemeral_storage_limit=2000,
     ),
-    env={
-        # ← ask user for environment variables
-    },
+    env={},
 )
 
-# Option B: From Dockerfile
-job = Job(
-    name="<JOB_NAME>",                              # ← confirmed with user
-    image=Build(
-        build_spec=DockerFileBuild(
-            dockerfile_path="<DOCKERFILE_PATH>",     # ← auto-detected, confirmed
-            command="<COMMAND>",                      # ← auto-detected, confirmed
-        ),
-        build_source=LocalSource(local_build=False),
-    ),
-    resources=Resources(
-        cpu_request=<CPU_REQUEST>,                   # ← from resource suggestion table
-        cpu_limit=<CPU_LIMIT>,                       # ← from resource suggestion table
-        memory_request=<MEMORY_REQUEST>,             # ← from resource suggestion table
-        memory_limit=<MEMORY_LIMIT>,                 # ← from resource suggestion table
-        ephemeral_storage_request=<STORAGE_REQUEST>, # ← from resource suggestion table
-        ephemeral_storage_limit=<STORAGE_LIMIT>,     # ← from resource suggestion table
-    ),
-)
+# Option B: DockerFileBuild — replace image=Build(...) with:
+#   image=Build(
+#       build_spec=DockerFileBuild(dockerfile_path="Dockerfile", command="python job.py"),
+#       build_source=LocalSource(local_build=False),
+#   )
 
-# Option C: Pre-built image
-from truefoundry.deploy import Image
-job = Job(
-    name="<JOB_NAME>",                              # ← confirmed with user
-    image=Image(
-        image_uri="<IMAGE_URI>",                     # ← confirmed with user
-        command="<COMMAND>",                          # ← auto-detected, confirmed
-    ),
-    resources=Resources(
-        cpu_request=<CPU_REQUEST>,                   # ← from resource suggestion table
-        cpu_limit=<CPU_LIMIT>,                       # ← from resource suggestion table
-        memory_request=<MEMORY_REQUEST>,             # ← from resource suggestion table
-        memory_limit=<MEMORY_LIMIT>,                 # ← from resource suggestion table
-        ephemeral_storage_request=<STORAGE_REQUEST>, # ← from resource suggestion table
-        ephemeral_storage_limit=<STORAGE_LIMIT>,     # ← from resource suggestion table
-    ),
-)
+# Option C: Pre-built image — replace image=Build(...) with:
+#   image=Image(image_uri="<IMAGE_URI>", command="<COMMAND>")
 
-job.deploy(workspace_fqn="<WORKSPACE_FQN>")          # ← ask user, never auto-pick
+job.deploy(workspace_fqn="<WORKSPACE_FQN>")
 ```
+
+Adjust resource values using the resource suggestion table above.
+
+**Parameterized jobs**: Use argparse in your script, then set the command with args (e.g., `command="python train.py --epochs 50"`).
+
+**GPU jobs**: Add `devices=[NvidiaGPU(name=GPUType.<TYPE>, count=1)]` to Resources. Import `NvidiaGPU, GPUType` from `truefoundry.deploy`.
+
+**Volume mounts**: Add `mounts=[VolumeMount(mount_path="/data", volume_fqn="cluster:ws:vol")]` to Job. Import `VolumeMount` from `truefoundry.deploy`.
 
 ### Scheduled Jobs (Cron)
 
@@ -307,53 +265,7 @@ Three options for scheduled jobs when a run overlaps:
 - **Allow**: Run in parallel
 - **Replace**: Kill current, start new
 
-### Parameterized Jobs
-
-```python
-import argparse
-# In your job script, use argparse for dynamic params
-parser = argparse.ArgumentParser()
-parser.add_argument("--epochs", type=int, default=10)
-parser.add_argument("--batch-size", type=int, default=32)
-args = parser.parse_args()
-```
-
-Then set command: `python train.py --epochs 50 --batch-size 64`
-
-### GPU Jobs
-
-```python
-from truefoundry.deploy import Resources, NvidiaGPU, GPUType
-
-resources = Resources(
-    cpu_request=<CPU_REQUEST>,                       # ← ask user
-    cpu_limit=<CPU_LIMIT>,                           # ← ask user
-    memory_request=<MEMORY_REQUEST>,                 # ← ask user (MB)
-    memory_limit=<MEMORY_LIMIT>,                     # ← ask user (MB)
-    devices=[NvidiaGPU(name=GPUType.<GPU_TYPE>, count=<GPU_COUNT>)],  # ← ask user
-)
-```
-
-### Job with Volume Mounts
-
-```python
-from truefoundry.deploy import Job, VolumeMount
-
-job = Job(
-    name="<JOB_NAME>",                              # ← ask user
-    # ... image, resources ...
-    mounts=[
-        VolumeMount(
-            mount_path="<MOUNT_PATH>",               # ← ask user
-            volume_fqn="<VOLUME_FQN>",               # ← ask user
-        ),
-    ],
-)
-```
-
-### Step 3: Write and Apply Manifest
-
-Write the manifest to `tfy-manifest.yaml`:
+### Step 3: Deploy
 
 ```bash
 # Preview
