@@ -34,6 +34,78 @@ MCP servers typically communicate over stdio (standard input/output). TrueFoundr
 
 <instructions>
 
+## Quick Deploy Flow
+
+**For the fastest deployment, present a single plan instead of asking questions one by one.**
+
+### 1. Check Preferences
+
+```bash
+PREFS_FILE=~/.config/truefoundry/preferences.yml
+if [ -f "$PREFS_FILE" ]; then
+  cat "$PREFS_FILE"
+fi
+```
+
+If preferences exist, pre-fill: workspace.
+If no preferences file, the only mandatory questions are **workspace**, **MCP package**, and **API keys/env vars**.
+
+### 2. Auto-Detect + Pre-fill
+
+Combine preferences + package info to fill every field:
+
+| Field | Source (priority order) |
+|-------|----------------------|
+| Workspace | 1. Preferences 2. Ask user |
+| MCP package | Ask user (required) |
+| Server name | Auto-suggest from package name |
+| Package type | Auto-detect (npm vs Python) from package name |
+| Env vars / API keys | Ask user (required — check MCP server docs) |
+| Resources | Default: 0.5/1.0 CPU, 512/1024 MB memory |
+| Port | Always 8000 (mcp-proxy default) |
+
+### 3. Present One Plan
+
+Present ALL values in a single summary and ask for confirmation:
+
+```
+I'll deploy your MCP server to TrueFoundry:
+
+| Setting        | Value                          | Source      |
+|----------------|--------------------------------|-------------|
+| Workspace      | my-cluster:dev-ws              | saved pref  |
+| Package        | @notionhq/notion-mcp-server    | user input  |
+| Server name    | notion-mcp                     | auto        |
+| Base image     | node:24                        | auto (npm)  |
+| Port           | 8000                           | default     |
+| CPU            | 0.5 / 1.0                      | default     |
+| Memory         | 512 / 1024 MB                  | default     |
+| Env vars       | NOTION_API_KEY (secret)        | user input  |
+
+Deploy with these settings? (say "yes" to deploy, or tell me what to change)
+```
+
+### 4. Handle Response
+
+- **"yes" / "looks good" / "deploy"** → deploy immediately using the steps below
+- **"change X to Y"** → update that one field, re-confirm
+- **"I want to customize"** → fall through to the full checklist flow below
+
+### 5. After Deploy — Offer to Save Preferences
+
+If no preferences file exists or new values were used:
+
+```
+Deployed successfully! Want me to save these settings as defaults?
+- Workspace: my-cluster:dev-ws
+
+This saves to ~/.config/truefoundry/preferences.yml so future deploys are even faster.
+```
+
+Use the `preferences` skill to save. If the user wants to edit preferences later, tell them to use the `preferences` skill directly.
+
+---
+
 ## User Confirmation Checklist
 
 **Confirm these with the user before deploying. Auto-detect where possible, show defaults, let user adjust.**
