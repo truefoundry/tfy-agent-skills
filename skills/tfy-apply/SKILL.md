@@ -172,7 +172,7 @@ type: helm
 source:
   type: oci-repo
   version: "16.7.21"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     postgresPassword: "STRONG_PASSWORD"

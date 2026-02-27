@@ -57,13 +57,13 @@ FOR each service in docker-compose.yml:
 
 | Image Pattern | Classification | TFY Deployment Type |
 |--------------|----------------|---------------------|
-| `postgres:*`, `postgresql:*` | Database | `type: helm` (Bitnami postgresql) |
-| `mysql:*`, `mariadb:*` | Database | `type: helm` (Bitnami mysql) |
-| `mongo:*`, `mongodb:*` | Database | `type: helm` (Bitnami mongodb) |
-| `redis:*`, `valkey:*` | Cache | `type: helm` (Bitnami redis) |
-| `memcached:*` | Cache | `type: helm` (Bitnami memcached) |
-| `rabbitmq:*` | Queue | `type: helm` (Bitnami rabbitmq) |
-| `elasticsearch:*` | Search | `type: helm` (Bitnami elasticsearch) |
+| `postgres:*`, `postgresql:*` | Database | `type: helm` |
+| `mysql:*`, `mariadb:*` | Database | `type: helm` |
+| `mongo:*`, `mongodb:*` | Database | `type: helm` |
+| `redis:*`, `valkey:*` | Cache | `type: helm` |
+| `memcached:*` | Cache | `type: helm` |
+| `rabbitmq:*` | Queue | `type: helm` |
+| `elasticsearch:*` | Search | `type: helm` |
 | `qdrant/qdrant:*` | VectorDB | `type: helm` (Qdrant) |
 | Custom image or `build:` | Application | `type: service` |
 
@@ -174,7 +174,7 @@ type: helm
 source:
   type: oci-repo
   version: "20.6.2"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/redis
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     enabled: false
@@ -314,7 +314,7 @@ type: helm
 source:
   type: oci-repo
   version: "16.7.21"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     postgresPassword: "GENERATED_STRONG_PASSWORD"
@@ -340,7 +340,7 @@ type: helm
 source:
   type: oci-repo
   version: "20.6.2"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/redis
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     password: "GENERATED_STRONG_PASSWORD"

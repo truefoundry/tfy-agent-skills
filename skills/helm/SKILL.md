@@ -56,7 +56,7 @@ For credential check commands and .env setup, see `references/prerequisites.md`.
 **Before deploying a Helm chart, ALWAYS confirm these with the user:**
 
 - [ ] **Chart source** -- Which chart? (suggest from common charts table)
-- [ ] **Chart registry** -- Public (Bitnami, official) or private registry?
+- [ ] **Chart registry** -- Public (official chart registries) or private registry?
 - [ ] **Chart version** -- Specific version or latest?
 - [ ] **Release name** -- What to call this deployment? (default: chart name + random suffix)
 - [ ] **Namespace/Workspace** -- Which workspace FQN? (never auto-pick)
@@ -79,7 +79,7 @@ For credential check commands and .env setup, see `references/prerequisites.md`.
 
 For chart sources, OCI URLs, registries, version discovery, and the chart selection guide, see [references/helm-chart-sources.md](references/helm-chart-sources.md).
 
-Key points: TrueFoundry supports `oci-repo` (recommended), `helm-repo`, and `git-helm-repo` source types. Bitnami charts (`oci://registry-1.docker.io/bitnamicharts/{chart}`) are recommended for most use cases.
+Key points: TrueFoundry supports `oci-repo` (recommended), `helm-repo`, and `git-helm-repo` source types. **Do NOT use Bitnami charts.** Always search [Artifact Hub](https://artifacthub.io) for the official chart from the project maintainers or use the chart publisher's own OCI registry.
 
 ## Deploy Flow
 
@@ -111,7 +111,7 @@ type: helm
 source:
   type: oci-repo
   version: "16.7.21"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     postgresPassword: GENERATED_OR_SECRET_REF
@@ -168,7 +168,7 @@ tfy_applications_create_deployment(
         "source": {
             "type": "oci-repo",
             "version": "16.7.21",
-            "oci_chart_url": "oci://registry-1.docker.io/bitnamicharts/postgresql"
+            "oci_chart_url": "oci://REGISTRY/CHART_NAME"
         },
         "values": {...},
         "workspace_fqn": "cluster-id:workspace-name"
@@ -198,7 +198,7 @@ $TFY_API_SH PUT /api/svc/v1/apps '{
     "source": {
       "type": "oci-repo",
       "version": "16.7.21",
-      "oci_chart_url": "oci://registry-1.docker.io/bitnamicharts/postgresql"
+      "oci_chart_url": "oci://REGISTRY/CHART_NAME"
     },
     "values": {
       "auth": {"postgresPassword": "...", "database": "myapp"},

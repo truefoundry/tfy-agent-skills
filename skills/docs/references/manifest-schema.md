@@ -206,7 +206,7 @@ Deploy any OCI-compatible Helm chart (databases, caches, message queues, monitor
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `type` | string | Yes | Must be `oci-repo` |
-| `oci_chart_url` | string | Yes | OCI chart URL (e.g., `oci://registry-1.docker.io/bitnamicharts/postgresql`) |
+| `oci_chart_url` | string | Yes | OCI chart URL (e.g., `oci://REGISTRY/CHART_NAME` — search [Artifact Hub](https://artifacthub.io) for the official chart) |
 | `version` | string | Yes | Chart version |
 
 ### Source (Git Helm Repo)
@@ -226,7 +226,7 @@ type: helm
 source:
   type: oci-repo
   version: "16.7.21"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     postgresPassword: "STRONG_PASSWORD_HERE"

@@ -36,7 +36,7 @@ Follow this algorithm for EVERY environment variable that references another ser
 
 ## Helm Chart DNS Naming Convention
 
-Bitnami Helm charts create Kubernetes services with predictable names. The pattern depends on the chart type:
+Helm charts create Kubernetes services with predictable names. The pattern depends on the chart type:
 
 ### CRITICAL: How Helm DNS Names Are Formed
 
@@ -46,12 +46,12 @@ Where `{release-name}` is the `name` field in your TFY manifest, and `{chart-suf
 
 | Chart | Chart Suffix | Full DNS Pattern | Default Port |
 |-------|-------------|------------------|-------------|
-| PostgreSQL (Bitnami) | `postgresql` | `{release-name}-postgresql.{ns}.svc.cluster.local` | 5432 |
-| Redis (Bitnami) | `redis-master` | `{release-name}-redis-master.{ns}.svc.cluster.local` | 6379 |
-| MongoDB (Bitnami) | `mongodb` | `{release-name}-mongodb.{ns}.svc.cluster.local` | 27017 |
-| MySQL (Bitnami) | `mysql` | `{release-name}-mysql.{ns}.svc.cluster.local` | 3306 |
-| RabbitMQ (Bitnami) | `rabbitmq` | `{release-name}-rabbitmq.{ns}.svc.cluster.local` | 5672 |
-| Kafka (Bitnami) | `kafka` | `{release-name}-kafka.{ns}.svc.cluster.local` | 9092 |
+| PostgreSQL | `postgresql` | `{release-name}-postgresql.{ns}.svc.cluster.local` | 5432 |
+| Redis | `redis-master` | `{release-name}-redis-master.{ns}.svc.cluster.local` | 6379 |
+| MongoDB | `mongodb` | `{release-name}-mongodb.{ns}.svc.cluster.local` | 27017 |
+| MySQL | `mysql` | `{release-name}-mysql.{ns}.svc.cluster.local` | 3306 |
+| RabbitMQ | `rabbitmq` | `{release-name}-rabbitmq.{ns}.svc.cluster.local` | 5672 |
+| Kafka | `kafka` | `{release-name}-kafka.{ns}.svc.cluster.local` | 9092 |
 | Elasticsearch | `elasticsearch` | `{release-name}-elasticsearch.{ns}.svc.cluster.local` | 9200 |
 | Qdrant | `qdrant` | `{release-name}-qdrant.{ns}.svc.cluster.local` | 6333 |
 

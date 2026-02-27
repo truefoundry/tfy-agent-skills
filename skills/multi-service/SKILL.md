@@ -102,9 +102,9 @@ ELSE IF service has `build:` field:
 
 | Type | Image Patterns | Deploy Method |
 |------|---------------|---------------|
-| **Database** | `postgres:*`, `mysql:*`, `mariadb:*`, `mongo:*` | Helm chart (Bitnami) via `tfy apply` |
-| **Cache** | `redis:*`, `memcached:*`, `valkey:*` | Helm chart (Bitnami) via `tfy apply` |
-| **Queue** | `rabbitmq:*`, `nats:*`, `kafka:*` | Helm chart (Bitnami) via `tfy apply` |
+| **Database** | `postgres:*`, `mysql:*`, `mariadb:*`, `mongo:*` | Helm chart via `tfy apply` |
+| **Cache** | `redis:*`, `memcached:*`, `valkey:*` | Helm chart via `tfy apply` |
+| **Queue** | `rabbitmq:*`, `nats:*`, `kafka:*` | Helm chart via `tfy apply` |
 | **Search/Vector DB** | `elasticsearch:*`, `qdrant/*`, `weaviate/*`, `milvus/*` | Helm chart via `tfy apply` |
 | **LLM** | `vllm/*`, `*tgi*`, `*triton*`, `*ollama*` | `llm-deploy` skill |
 | **Application** | Has `build:` or any other custom image | Service deployment via `tfy apply` |
@@ -293,7 +293,7 @@ type: helm
 source:
   type: oci-repo
   version: "16.4.1"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     postgresPassword: GENERATED_PASSWORD

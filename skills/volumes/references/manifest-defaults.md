@@ -577,7 +577,7 @@ PostgreSQL, MySQL, MongoDB via Helm charts. Source types: `helm-repo`, `oci-repo
 
 | Field | Default | Override When |
 |-------|---------|--------------|
-| `chart` | `bitnamicharts/postgresql` | MySQL: `bitnamicharts/mysql`. MongoDB: `bitnamicharts/mongodb`. |
+| `chart` | Search [Artifact Hub](https://artifacthub.io) for the official chart | Same for MySQL, MongoDB -- find the official chart from the project maintainers |
 | `version` | `"16.7.21"` | Check latest at registry |
 | `persistence.size` | `10Gi` | Production: `50Gi`-`500Gi` based on data volume |
 | `cpu requests` | `"0.5"` | Production: `"2"`-`"4"` |
@@ -593,7 +593,7 @@ type: helm
 source:
   type: oci-repo
   version: "${PG_CHART_VERSION:-16.7.21}"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/postgresql
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     postgresPassword: "${DB_PASSWORD}"
@@ -620,7 +620,7 @@ type: helm
 source:
   type: oci-repo
   version: "${MYSQL_CHART_VERSION:-11.1.17}"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/mysql
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     rootPassword: "${DB_PASSWORD}"
@@ -647,7 +647,7 @@ type: helm
 source:
   type: oci-repo
   version: "${MONGO_CHART_VERSION:-16.4.3}"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/mongodb
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     rootPassword: "${DB_PASSWORD}"
@@ -686,7 +686,7 @@ Redis, Memcached via Helm charts. Source types: `helm-repo`, `oci-repo`, `git-he
 
 | Field | Default | Override When |
 |-------|---------|--------------|
-| `chart` | `bitnamicharts/redis` | Memcached: `bitnamicharts/memcached` |
+| `chart` | Search [Artifact Hub](https://artifacthub.io) for the official chart | Same for Memcached -- find the official chart from the project maintainers |
 | `version` | `"20.6.2"` | Check latest at registry |
 | `persistence.size` | `5Gi` | Large cache: `20Gi`-`50Gi` |
 | `cpu requests` | `"0.25"` | High-throughput cache: `"1"`-`"2"` |
@@ -701,7 +701,7 @@ type: helm
 source:
   type: oci-repo
   version: "${REDIS_CHART_VERSION:-20.6.2}"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/redis
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
     password: "${REDIS_PASSWORD}"
@@ -727,7 +727,7 @@ type: helm
 source:
   type: oci-repo
   version: "${MEMCACHED_CHART_VERSION:-7.5.5}"
-  oci_chart_url: oci://registry-1.docker.io/bitnamicharts/memcached
+  oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   resources:
     requests:

@@ -45,6 +45,24 @@ Use the CLI path by default. Use `tfy apply` for pre-built images, `tfy deploy` 
 
 For credential check commands and .env setup, see `references/prerequisites.md`.
 
+## CRITICAL: Check for Multi-Service Projects First
+
+**Before creating any manifest, ALWAYS scan the project to check if it contains multiple deployable services.** A project with multiple services (e.g., frontend + backend, or backend + worker + database) needs the `multi-service` skill, not this one.
+
+### Quick Scan
+
+1. Check for `docker-compose.yml`, `docker-compose.yaml`, `compose.yml`, or `compose.yaml` — if found, this is likely a multi-service project
+2. Look for multiple `Dockerfile` files: `Dockerfile`, `Dockerfile.*`, `*/Dockerfile`
+3. Check for service directories with their own dependency files (`package.json`, `requirements.txt`, `go.mod`) in subdirectories like `services/`, `apps/`, `frontend/`, `backend/`, `api/`, `web/`, `worker/`
+4. Look for monorepo patterns: multiple deployable components in `packages/`, `services/`, `apps/`
+
+### Decision
+
+- **Single service detected** → Continue with this `deploy` skill
+- **Multiple services detected** → Stop and use the `multi-service` skill instead. Tell the user: "I detected multiple services in your project. I'll use the multi-service deployment flow to deploy them together with proper wiring."
+
+**Do NOT create a manifest for just one service if the project has multiple interconnected services.** Deploying a backend without its database, or a frontend without its API, results in a broken deployment.
+
 ## Step 0: Scan Environment & Ask Key Questions
 
 ### 0a. Discover All TFY Variables
