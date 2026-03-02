@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: Deploys code or container images to TrueFoundry as HTTP services. Supports YAML manifests with `tfy apply`, Git-based remote builds, and pre-built images. Use when deploying apps, shipping services to production, or hosting web services on TrueFoundry.
+description: Deploys applications to TrueFoundry. Handles single HTTP services, async/queue workers, multi-service projects, and declarative manifest apply. Supports `tfy apply`, `tfy deploy`, docker-compose translation, and CI/CD pipelines. Use when deploying apps, applying manifests, shipping services, or orchestrating multi-service deployments.
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 metadata:
@@ -8,258 +8,65 @@ metadata:
 allowed-tools: Bash(tfy*) Bash(*/tfy-api.sh *) Bash(*/tfy-version.sh *) Bash(docker *) Bash(tfy deploy*)
 ---
 
-<objective>
-
 # Deploy to TrueFoundry
 
-Deploy code or images to TrueFoundry. Three paths:
+Route user intent to the right deployment workflow. Load only the references you need.
 
-1. **CLI: `tfy apply`** — For pre-built Docker images. Write a YAML manifest and apply it.
-2. **CLI: `tfy deploy`** — For local code or git sources (builds remotely). Write a YAML manifest and deploy.
-3. **REST API** (fallback) — When CLI unavailable, use `tfy-api.sh`.
+## Intent Router
 
-Use the CLI path by default. Use `tfy apply` for pre-built images, `tfy deploy` for build sources. Fall back to REST API only if `tfy` CLI is not installed and the user cannot install it.
-
-## When to Use
-
-- User says "deploy", "deploy to truefoundry", "ship this"
-- User wants to push code or images to TrueFoundry
-- User says "deploy and check status"
-
-## When NOT to Use
-
-- User wants to see what's deployed -> use `applications` skill
-- User wants to check workspace -> use `workspaces` skill
-
-</objective>
-
-<context>
-
-## Prerequisites
-
-**Always verify before deploying:**
-
-1. **Credentials** -- `TFY_BASE_URL` and `TFY_API_KEY` must be set (env or `.env`)
-2. **Workspace** -- `TFY_WORKSPACE_FQN` required. **Never auto-pick. Ask the user if missing.**
-3. **CLI** -- Check if `tfy` CLI is available
-
-For credential check commands and .env setup, see `references/prerequisites.md`.
-
-## CRITICAL: Check for Multi-Service Projects First
-
-**Before creating any manifest, ALWAYS scan the project to check if it contains multiple deployable services.** A project with multiple services (e.g., frontend + backend, or backend + worker + database) needs the `multi-service` skill, not this one.
-
-### Quick Scan
-
-1. Check for `docker-compose.yml`, `docker-compose.yaml`, `compose.yml`, or `compose.yaml` — if found, this is likely a multi-service project
-2. Look for multiple `Dockerfile` files: `Dockerfile`, `Dockerfile.*`, `*/Dockerfile`
-3. Check for service directories with their own dependency files (`package.json`, `requirements.txt`, `go.mod`) in subdirectories like `services/`, `apps/`, `frontend/`, `backend/`, `api/`, `web/`, `worker/`
-4. Look for monorepo patterns: multiple deployable components in `packages/`, `services/`, `apps/`
-
-### Decision
-
-- **Single service detected** → Continue with this `deploy` skill
-- **Multiple services detected** → Stop and use the `multi-service` skill instead. Tell the user: "I detected multiple services in your project. I'll use the multi-service deployment flow to deploy them together with proper wiring."
-
-**Do NOT create a manifest for just one service if the project has multiple interconnected services.** Deploying a backend without its database, or a frontend without its API, results in a broken deployment.
-
-## Step 0: Scan Environment & Ask Key Questions
-
-### 0a. Discover All TFY Variables
-
-**FIRST action before anything else** — scan `.env` and environment for all TFY-prefixed variables:
-
-```bash
-# Discover all TFY-prefixed variables from .env
-grep '^TFY_' .env 2>/dev/null || true
-
-# Check environment
-env | grep '^TFY_' 2>/dev/null || true
-```
-
-Use discovered values to skip unnecessary API calls and pre-fill questions below.
-
-> **WARNING:** Never use `source .env`. The `tfy-api.sh` script handles `.env` parsing automatically with proper quote-stripping. For shell access to individual values, use: `grep KEY .env | cut -d= -f2-`
-
-### 0b. Detect Tools
-
-```bash
-# Check for CLI
-tfy --version 2>/dev/null
-
-# Check for Git repo
-git remote -v 2>/dev/null
-
-# Check for existing manifest
-ls tfy-manifest.yaml truefoundry.yaml 2>/dev/null
-
-# Check for Docker (only matters for local build path)
-docker --version 2>/dev/null
-
-# Get current branch (for git-based deploys)
-git branch --show-current 2>/dev/null
-```
-
-If `tfy` CLI is not installed:
-```bash
-pip install truefoundry
-```
-
-### 0c. Ask Workspace (Mandatory)
-
-**Never skip this. Never auto-pick.**
-
-1. Check if `TFY_WORKSPACE_FQN` was found in `.env` or environment (from step 0a)
-2. If found: **confirm** with the user — "I found workspace `X` — deploy there?"
-3. If not found: **ask** — "Which workspace should I deploy to? (format: `cluster:workspace`)"
-4. Only if the user doesn't know their workspace, THEN list workspaces using the `workspaces` skill
-
-### 0d. Ask Deployment Source (Mandatory)
-
-**Never auto-decide the deployment strategy.** Always ask:
-
-```
-How do you want to deploy?
-1. Local code (upload from this machine) — DEFAULT
-2. Git repo (TrueFoundry pulls from GitHub/GitLab)
-3. Pre-built Docker image (already in a registry)
-```
-
-Then ask about build method:
-```
-How should the image be built?
-1. Use existing Dockerfile — DEFAULT (if Dockerfile detected)
-2. Create a Dockerfile (I'll help write one)
-3. Use buildpack (no Dockerfile needed, Python only)
-```
-
-Use environment checks (git remote, Dockerfile presence) as **context to inform suggestions**, but never auto-decide.
-
-## Choose Deployment Command
-
-**Critical:** The CLI command depends on the image source type. See `references/cli-fallback.md` for details.
-
-| Situation | Command | Manifest file |
+| User Intent | Action | Reference |
 |---|---|---|
-| Pre-built Docker image | `tfy apply -f tfy-manifest.yaml` | `tfy-manifest.yaml` |
-| Local code + Dockerfile | `tfy deploy -f truefoundry.yaml --no-wait` | `truefoundry.yaml` |
-| Git source + Dockerfile | `tfy deploy -f truefoundry.yaml --no-wait` | `truefoundry.yaml` |
-| Git source + Buildpack | `tfy deploy -f truefoundry.yaml --no-wait` | `truefoundry.yaml` |
-| Has existing manifest | Check `image.type` → use appropriate command above |
+| "deploy", "deploy my app", "ship this" | Single HTTP service | [deploy-service.md](references/deploy-service.md) |
+| "tfy apply", "apply manifest", "deploy from yaml" | Declarative manifest apply | [deploy-apply.md](references/deploy-apply.md) |
+| "deploy everything", "full stack", docker-compose | Multi-service orchestration | [deploy-multi.md](references/deploy-multi.md) |
+| "async service", "queue consumer", "worker" | Async/queue service | [deploy-async.md](references/deploy-async.md) |
+| "deploy LLM", "serve model" | LLM model serving | Use `llm-deploy` skill |
+| "deploy helm chart", "deploy database" | Helm chart | Use `helm` skill |
 
-> **`tfy apply` does NOT support `build_source`.** Using it with git/local sources fails with "must match exactly one schema in oneOf". Always use `tfy deploy -f` for source-based deployments.
+**Load only the reference file matching the user's intent.** Do not preload all references.
 
-</context>
+## Prerequisites (All Workflows)
 
-<instructions>
+```bash
+# 1. Check credentials
+grep '^TFY_' .env 2>/dev/null || true
+env | grep '^TFY_' 2>/dev/null || true
 
-## Step 1: Discover Cluster Capabilities
+# 2. Check CLI
+tfy --version 2>/dev/null || echo "Install: pip install truefoundry"
 
-**Before asking the user about resources, GPUs, or public URLs**, fetch the cluster's capabilities so you can present only what's actually available.
-
-Fetch the cluster's capabilities before asking about resources or public URLs. See `references/cluster-discovery.md` for how to extract cluster ID from workspace FQN and fetch cluster details (GPUs, base domains, storage classes).
-
-### Extract Available Capabilities
-
-From the cluster response, extract:
-1. **Base domains** -- pick the wildcard domain, strip `*.` -> base domain for constructing hosts.
-2. **Available GPUs** -- present only GPU types the cluster supports, not a generic list.
-
-### Why This Matters
-
-- Deploying with an unsupported GPU type -> API error
-- Using wrong base domain -> "Provided host is not configured in cluster"
-- These are the #1 and #2 most common deployment failures
-
-**Always discover before asking.** This prevents wasted round-trips with the user.
-
-## Step 2: Analyze Application & Suggest Resources
-
-**Before asking about CPU/memory/GPU**, analyze the user's codebase and ask about expected load. This produces informed resource suggestions instead of arbitrary defaults.
-
-### 2a. Codebase Analysis
-
-Scan the project to determine:
-
-1. **Framework & runtime** -- Look at dependency files and entrypoints:
-   - `requirements.txt`, `pyproject.toml`, `setup.py` -> Python (check for FastAPI, Flask, Django, Celery, etc.)
-   - `package.json` -> Node.js (check for Express, Next.js, NestJS, etc.)
-   - `go.mod` -> Go
-   - `Dockerfile` -> check `FROM` image and `CMD`/`ENTRYPOINT`
-
-2. **Application type** -- Categorize what the app does:
-   - **Web API / HTTP service** -- REST/GraphQL endpoint (FastAPI, Express, Django, etc.)
-   - **ML inference** -- Model serving (vLLM, TGI, Triton, transformers, torch, etc.)
-   - **Worker / queue consumer** -- Background processing (Celery, Bull, etc.)
-   - **Static site / frontend** -- Next.js SSR, React SPA, etc.
-   - **Data pipeline** -- Batch processing (Spark, pandas, etc.)
-
-3. **Compute indicators** -- Check for signals that affect resource needs:
-   - ML libraries (`torch`, `transformers`, `vllm`, `tensorflow`) -> likely needs GPU + high memory
-   - Image/video processing (`Pillow`, `opencv`, `ffmpeg`) -> CPU-intensive
-   - In-memory caching or large datasets (`redis`, `pandas` with large files) -> memory-intensive
-   - Async/concurrent patterns (`asyncio`, `uvicorn workers`, `gunicorn`) -> can handle more load per CPU
-   - Database connections (`sqlalchemy`, `prisma`, `mongoose`) -> connection pooling matters
-
-### 2b. Ask About Expected Load
-
-Based on the app type, ask the user targeted questions about expected TPS, concurrent users, latency targets, and environment (dev/staging/prod). For detailed question templates by app type (Web APIs, ML inference, workers), see [references/load-analysis-questions.md](references/load-analysis-questions.md).
-
-### 2c. Resource Suggestion Table
-
-Present a comparison table with defaults, suggested values, and let the user choose:
-
-```
-Based on your app (FastAPI web API, ~50 TPS, production):
-
-| Resource      | Default (min) | Suggested    | Notes                              |
-|---------------|---------------|--------------|-------------------------------------|
-| CPU request   | 0.25 cores    | 1.0 cores    | 50 TPS with async needs ~1 core    |
-| CPU limit     | 0.5 cores     | 2.0 cores    | Headroom for traffic spikes         |
-| Memory request| 256 MB        | 512 MB       | FastAPI + dependencies baseline     |
-| Memory limit  | 512 MB        | 1024 MB      | 2x request for safety margin        |
-| Replicas (min)| 1             | 2            | HA for production                   |
-| Replicas (max)| 1             | 4            | Autoscale for peak traffic          |
-| GPU           | None          | None         | Not needed for this workload        |
-
-Do you want to use the suggested values, or customize any of them?
+# 3. Check for existing manifests
+ls tfy-manifest.yaml truefoundry.yaml 2>/dev/null
 ```
 
-### Resource Estimation Guidelines
+- `TFY_BASE_URL` and `TFY_API_KEY` must be set (env or `.env`).
+- `TFY_WORKSPACE_FQN` required. **Never auto-pick. Always ask the user.**
+- For full credential setup, see `references/prerequisites.md`.
 
-For detailed CPU, memory, GPU, and replica estimation rules of thumb, see `references/resource-estimation.md`. Key points:
+> **WARNING:** Never use `source .env`. The `tfy-api.sh` script handles `.env` parsing automatically. For shell access: `grep KEY .env | cut -d= -f2-`
 
-- Always check available GPU types on the cluster (Step 1)
-- Memory limit should be 1.5-2x the request
-- Production: min 2 replicas for high availability
-- GPU VRAM needed ~ model parameter count x 2 bytes (FP16)
+## Quick Ops (Inline)
 
-### Important Notes
+### Apply a manifest (most common)
 
-- **Always show the suggestion table** -- Don't just pick values silently. Users should see the reasoning.
-- **Let users override** -- Suggestions are starting points, not mandates.
-- **Mention trade-offs** -- More resources = higher cost, fewer = risk of OOM/throttling.
-- **Factor in environment** -- Dev gets minimal defaults, production gets HA suggestions.
-- **Reference cluster capabilities** -- Only suggest GPU types that are actually available (from Step 1).
+```bash
+# Preview changes
+tfy apply -f tfy-manifest.yaml --dry-run --show-diff
 
-## Deploy Flow
+# Apply
+tfy apply -f tfy-manifest.yaml
+```
 
-### Step 1: Generate YAML Manifest
+### Deploy from source (local code or git)
 
-Based on the gathered information (image source, resources, ports, env vars), generate a YAML manifest file.
+```bash
+# tfy deploy builds remotely — use for local code or git sources
+tfy deploy -f truefoundry.yaml --no-wait
+```
 
-Reference `references/manifest-schema.md` for field definitions and `references/manifest-defaults.md` for recommended defaults per service type.
+> **`tfy apply` does NOT support `build_source`.** Use `tfy deploy -f` for source-based deployments.
 
-**Deployment options** (full YAML examples in `references/deploy-api-examples.md`):
-
-| Option | When to Use |
-|--------|-------------|
-| **A: Pre-built Image** | User has a Docker image ready to deploy |
-| **B: Git + Dockerfile** | Code is in Git with a Dockerfile -- TrueFoundry builds remotely |
-| **C: Git + PythonBuild** | Python code in Git, no Dockerfile -- TrueFoundry auto-builds |
-| **D: Local Docker Build** | Code not in Git -- build locally, push, then use Option A |
-
-Example YAML manifest (pre-built image):
+### Minimal service manifest template
 
 ```yaml
 name: my-service
@@ -269,9 +76,7 @@ image:
   image_uri: docker.io/myorg/my-api:v1.0
 ports:
   - port: 8000
-    protocol: TCP
     expose: true
-    host: my-service-ws.ml.your-org.truefoundry.cloud
     app_protocol: http
 resources:
   cpu_request: 0.5
@@ -283,351 +88,100 @@ resources:
 env:
   LOG_LEVEL: info
 replicas: 1
-workspace_fqn: cluster-id:workspace-name
+workspace_fqn: "WORKSPACE_FQN_HERE"
 ```
 
-### Step 2: Write Manifest
-
-Write the manifest to `tfy-manifest.yaml` in the project directory.
-
-### Step 3: Preview
-
-For pre-built images (`image.type: image`):
-```bash
-tfy apply -f tfy-manifest.yaml --dry-run --show-diff
-```
-
-For build sources (`image.type: build`):
-```bash
-# tfy deploy does not support --dry-run; review the manifest manually
-cat truefoundry.yaml
-```
-
-Show the preview output to the user. If this is an update to an existing service, the diff shows what will change.
-
-### Step 4: Deploy
-
-After user confirms, use the appropriate command based on image type:
-
-**Pre-built image** (`image.type: image`):
-```bash
-tfy apply -f tfy-manifest.yaml
-```
-
-**Build source** (`image.type: build` — local or git):
-```bash
-tfy deploy -f truefoundry.yaml --no-wait
-```
-
-> **Do NOT use `tfy apply` with build sources.** It will fail with "must match exactly one schema in oneOf". See `references/cli-fallback.md` for details.
-
-### Fallback: REST API
-
-If `tfy` CLI is not available, convert the YAML manifest to JSON and deploy via REST API. See `references/cli-fallback.md` for the conversion process and `references/rest-api-manifest.md` for the full API reference.
+### Check deployment status
 
 ```bash
 TFY_API_SH=~/.claude/skills/truefoundry-deploy/scripts/tfy-api.sh
-
-# Get workspace ID from FQN
-bash $TFY_API_SH GET "/api/svc/v1/workspaces?fqn=${TFY_WORKSPACE_FQN}"
-
-# Deploy via REST API (JSON body)
-bash $TFY_API_SH PUT /api/svc/v1/apps '{ "manifest": { ... }, "workspaceId": "WORKSPACE_ID" }'
+bash $TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationName=SERVICE_NAME'
 ```
 
-> **Note:** Use `bash $TFY_API_SH` instead of `$TFY_API_SH` directly to avoid "permission denied" errors if the script lacks execute permissions.
+Or use the `applications` skill.
 
-## User Confirmation Checklist
+### REST API fallback (when CLI unavailable)
 
-**Before deploying, confirm these with the user:**
+See `references/cli-fallback.md` for converting YAML to JSON and deploying via `tfy-api.sh`.
 
-- [ ] **Service name** -- what to call this deployment
-- [ ] **Image source** -- pre-built image, Git repo + Dockerfile, Git repo + PythonBuild, or local Docker build?
-- [ ] **Branch** (if git source) -- which branch to build from? Default to current branch (`git branch --show-current`), never hardcode `main`
-- [ ] **Port** -- what port the application listens on
-- [ ] **Expected load** -- TPS, concurrent users, environment (dev/staging/prod) -> use Step 2 analysis
-- [ ] **CPU/Memory** -- show resource suggestion table from Step 2 (defaults vs suggested values)
-- [ ] **GPU** -- whether GPU is needed (only offer available types from Step 1)
-- [ ] **Replicas** -- min/max for autoscaling (suggest based on load analysis)
-- [ ] **Environment variables** -- check `.env`, `config.py`, or ask directly
-- [ ] **Health probes** -- configure startup/readiness/liveness probes (recommended for production)
-- [ ] **Public URL** -- internal-only or public? If public, look up cluster base domains and confirm the host
-- [ ] **Secrets** -- scan env vars for sensitive values and create TrueFoundry secret groups (see Secrets Handling below)
-- [ ] **Auto-shutdown** -- does the user want the service to auto-stop after inactivity? Useful for dev/staging to save costs. Not recommended for production services that need to be always-on.
+## Auto-Detection: Single vs Multi-Service
 
-**Do NOT deploy with hardcoded defaults without asking.** Analyze the app (Step 2), suggest appropriate values, and let the user confirm or adjust.
+**Before creating any manifest, scan the project:**
 
-## Health Probes
+1. Check for `docker-compose.yml` / `compose.yaml` — if found, likely multi-service
+2. Look for multiple `Dockerfile` files across the project
+3. Check for service directories with their own dependency files in `services/`, `apps/`, `frontend/`, `backend/`
 
-**Always configure health probes for production services.** Without them, Kubernetes may route traffic to unready pods or fail to restart crashed ones.
-
-| Probe | Purpose | When to Use |
-|-------|---------|-------------|
-| **Startup** | Wait for app to initialize | Apps with slow startup (model loading, DB migrations, cache warming) |
-| **Readiness** | Can this pod receive traffic? | Always -- prevents routing to unready pods |
-| **Liveness** | Is this pod alive? | Always -- restarts hung processes |
-
-For YAML probe examples (startup, readiness, liveness), REST API format, and tuning guidelines by app type, see [references/health-probes.md](references/health-probes.md).
-
-### Tuning Guidelines
-
-- **Startup probe**: Set `failure_threshold x period_seconds` >= max app startup time
-- **Fast APIs** (< 5s startup): `initial_delay_seconds: 3`, `failure_threshold: 5`
-- **Slow apps** (DB migrations, cache warming): `initial_delay_seconds: 15`, `failure_threshold: 30`
-- **ML model loading**: `initial_delay_seconds: 10`, `failure_threshold: 60` (see `llm-deploy` skill)
-
-See: [Liveness & Readiness Probes](https://truefoundry.com/docs/liveness-readiness-probe)
-
-## Autoscaling & Rollout Strategy
-
-YAML format for replicas and autoscaling:
-
-```yaml
-replicas:
-  min: 2
-  max: 10
-```
-
-YAML format for rollout strategy:
-
-```yaml
-rollout_strategy:
-  type: rolling_update
-  max_surge_percentage: 25
-  max_unavailable_percentage: 0
-```
-
-For scaling guidelines by environment, rollout strategy options, and zero-downtime deploy settings, see `references/deploy-scaling.md`.
-
-Key points:
-- Production: min 2 replicas for high availability
-- Default rollout: `max_surge: 25%, max_unavailable: 0%` (zero-downtime)
-- Scale-to-zero is available for async services (see `async-service` skill)
-
----
-
-## Public URL (Exposing a Service)
-
-When the user wants their service publicly accessible, **do NOT guess the domain -- always look it up.**
-
-1. **Get base domains** -- See `references/cluster-discovery.md` for cluster ID extraction and base domain lookup. Pick the wildcard domain, strip `*.`.
-2. **Construct host** -- Convention: `{service-name}-{workspace-name}.{base_domain}` (e.g., `simple-server-my-workspace.ml.your-org.truefoundry.cloud`)
-3. **Confirm with user** -- Show the constructed `https://` URL and ask if correct.
-4. **Set in manifest**:
-   ```yaml
-   ports:
-     - port: 8000
-       expose: true
-       host: my-service-ws.ml.your-org.truefoundry.cloud
-       app_protocol: http
-   ```
-5. **Internal-only** -- Set `expose: false` and omit `host`. Service is only reachable within the cluster.
-
-**Common errors:** "Provided host is not configured in cluster" means the domain doesn't match cluster `base_domains` -- re-check via cluster API. See `references/deploy-errors.md`.
-
-See: [Define Ports and Domains](https://truefoundry.com/docs/define-ports-and-domains)
+- **Single service** → Load `references/deploy-service.md`
+- **Multiple services** → Load `references/deploy-multi.md`
 
 ## Secrets Handling
 
-**Never put sensitive values directly in the `env` section of a manifest.** Instead, create a TrueFoundry secret group and reference secrets using the `tfy-secret://` format.
-
-### Step 1: Identify Sensitive Environment Variables
-
-Scan the user's env vars for sensitive patterns. Any key matching these patterns should be stored as a secret:
-
-- `*PASSWORD*`, `*SECRET*`, `*TOKEN*`, `*KEY*` (except non-sensitive keys like `LOG_LEVEL`)
-- `*CREDENTIAL*`, `*AUTH*`, `*PRIVATE*`
-- `*DATABASE_URL*`, `*CONNECTION_STRING*`, `*DSN*`
-- `*API_KEY*`, `*ACCESS_KEY*`, `*CLIENT_SECRET*`
-
-Tell the user which env vars you identified as sensitive and confirm before proceeding.
-
-### Step 2: Find the Secret Store Integration ID
-
-Before creating a secret group, find the available secret store integration:
-
-```bash
-TFY_API_SH=~/.claude/skills/truefoundry-deploy/scripts/tfy-api.sh
-
-# List secret store integrations
-bash $TFY_API_SH GET '/api/svc/v1/provider-accounts?type=secret-store'
-```
-
-From the response, extract integrations with `type: "secret-store"`. Pick the integration that matches the workspace's cloud provider (AWS, Azure, GCP). Use the integration `id` field.
-
-### Step 3: Create a Secret Group
-
-Create a secret group named `{service-name}-secrets` with all sensitive values:
-
-```bash
-TFY_API_SH=~/.claude/skills/truefoundry-deploy/scripts/tfy-api.sh
-
-bash $TFY_API_SH POST /api/svc/v1/secret-groups '{
-  "name": "my-service-secrets",
-  "integrationId": "INTEGRATION_ID",
-  "secrets": [
-    {"key": "DB_PASSWORD", "value": "actual-password-value"},
-    {"key": "API_KEY", "value": "actual-api-key-value"}
-  ]
-}'
-```
-
-Or use the `secrets` skill for a guided workflow.
-
-### Step 4: Reference Secrets in the Manifest
-
-Use the `tfy-secret://` format in the manifest `env` section:
-
-```
-tfy-secret://<TENANT_NAME>:<SECRET_GROUP_NAME>:<SECRET_KEY>
-```
-
-The `TENANT_NAME` is the subdomain of `TFY_BASE_URL` (e.g., if `TFY_BASE_URL=https://my-org.truefoundry.cloud`, then `TENANT_NAME=my-org`).
-
-### Complete Example
-
-Given these user-provided env vars:
-- `LOG_LEVEL=info` (not sensitive)
-- `DB_PASSWORD=s3cret123` (sensitive)
-- `API_KEY=sk-abc123` (sensitive)
-- `APP_PORT=8000` (not sensitive)
-
-1. Create the secret group with `DB_PASSWORD` and `API_KEY`
-2. Write the manifest with secret references for sensitive values and plain text for non-sensitive values:
+**Never put sensitive values directly in manifests.** Store them as TrueFoundry secrets and reference with `tfy-secret://` format:
 
 ```yaml
-name: my-service
-type: service
-image:
-  type: image
-  image_uri: docker.io/myorg/my-api:v1.0
-ports:
-  - port: 8000
-    expose: false
-    app_protocol: http
-resources:
-  cpu_request: 0.5
-  cpu_limit: 1
-  memory_request: 512
-  memory_limit: 1024
-  ephemeral_storage_request: 1000
-  ephemeral_storage_limit: 2000
 env:
-  LOG_LEVEL: info
-  APP_PORT: "8000"
-  DB_PASSWORD: tfy-secret://my-org:my-service-secrets:DB_PASSWORD
-  API_KEY: tfy-secret://my-org:my-service-secrets:API_KEY
-workspace_fqn: cluster-id:workspace-name
+  LOG_LEVEL: info                                              # plain text OK
+  DB_PASSWORD: tfy-secret://my-org:my-service-secrets:DB_PASSWORD  # sensitive
 ```
 
-**Key rules:**
-- Non-sensitive values (`LOG_LEVEL`, `APP_PORT`) stay as plain text
-- Sensitive values use `tfy-secret://` references
-- The secret group must be created before deploying
-- Never log or display the actual secret values
+Pattern: `tfy-secret://<TENANT_NAME>:<SECRET_GROUP_NAME>:<SECRET_KEY>` where TENANT_NAME is the subdomain of `TFY_BASE_URL`.
 
----
+Use the `secrets` skill for guided secret group creation. For the full secrets workflow, see `references/deploy-service.md` (Secrets Handling section).
 
-## After Deploy -- Get & Return URL
+## Shared References
 
-**CRITICAL: Always fetch and return the deployment URL to the user. A deployment without a URL is incomplete.**
+These references are available for all workflows — load as needed:
 
-### Step 1: Poll for Deployment Status
+| Reference | Contents |
+|---|---|
+| `manifest-schema.md` | Complete YAML field reference (single source of truth) |
+| `manifest-defaults.md` | Per-service-type defaults with YAML templates |
+| `cli-fallback.md` | CLI detection and REST API fallback pattern |
+| `cluster-discovery.md` | Extract cluster ID, base domains, available GPUs |
+| `resource-estimation.md` | CPU, memory, GPU sizing rules of thumb |
+| `health-probes.md` | Startup, readiness, liveness probe configuration |
+| `gpu-reference.md` | GPU types and VRAM reference |
+| `container-versions.md` | Pinned container image versions |
+| `prerequisites.md` | Credential setup and .env configuration |
+| `rest-api-manifest.md` | Full REST API manifest reference |
 
-After deploying, the deployment is submitted but not yet live. Poll the status:
+## Workflow-Specific References
 
-```bash
-TFY_API_SH=~/.claude/skills/truefoundry-deploy/scripts/tfy-api.sh
-
-# Get application details -- replace SERVICE_NAME and WORKSPACE_FQN
-$TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationName=SERVICE_NAME'
-```
-
-Or via tool call:
-```
-tfy_applications_list(filters={"workspace_fqn": "WORKSPACE_FQN", "application_name": "SERVICE_NAME"})
-```
-
-### Step 2: Extract the URL
-
-From the API response, look for the endpoint URL in the application object:
-- **Public services**: The URL is in `ports[].host` or constructed from the host you set during deployment
-- **Internal services**: The internal DNS is `{service-name}.{namespace}.svc.cluster.local:{port}`
-
-### Step 3: Report to User
-
-**Always present this summary after deployment:**
-
-```
-Deployment successful!
-
-Service: {service-name}
-Workspace: {workspace-fqn}
-Status: {BUILDING|DEPLOYING|RUNNING}
-
-Endpoints:
-  Public URL:   https://{host} (available once status is RUNNING)
-  Internal DNS: {service-name}.{namespace}.svc.cluster.local:{port}
-
-Next steps:
-  - Wait for status to become RUNNING (check with: applications skill)
-  - Test the endpoint: curl https://{host}/health
-  - View logs if issues: logs skill
-```
-
-**If the service has a public URL**, include the full `https://` URL.
-**If internal-only**, show the Kubernetes DNS address and explain how other services can reach it.
-**If status is still BUILDING**, tell the user it will take a few minutes and suggest checking back.
-
-### Step 4: Verify Health (Optional but Recommended)
-
-If the deployment shows RUNNING status, do a quick health check:
-
-```bash
-curl -s https://{host}/health
-```
-
-Report the result to the user. For comprehensive validation (endpoint smoke tests, load soak), use the `service-test` skill.
-
-</instructions>
-
-<success_criteria>
-
-## Success Criteria
-
-- The user can access their deployed service via the returned URL (public or internal)
-- The deployment is healthy with all replicas running and passing health checks
-- The agent has confirmed service name, resources, port, and image source with the user before deploying
-- The deployment URL and status have been reported back to the user
-- Health probes are configured for production deployments
-- The user knows how to check logs and redeploy if issues arise
-
-</success_criteria>
-
-<references>
+| Reference | Used By |
+|---|---|
+| `deploy-api-examples.md` | deploy-service |
+| `deploy-errors.md` | deploy-service |
+| `deploy-scaling.md` | deploy-service |
+| `load-analysis-questions.md` | deploy-service |
+| `codebase-analysis.md` | deploy-service |
+| `tfy-apply-cicd.md` | deploy-apply |
+| `tfy-apply-extra-manifests.md` | deploy-apply |
+| `compose-translation.md` | deploy-multi |
+| `dependency-graph.md` | deploy-multi |
+| `multi-service-errors.md` | deploy-multi |
+| `multi-service-patterns.md` | deploy-multi |
+| `service-wiring.md` | deploy-multi |
+| `async-errors.md` | deploy-async |
+| `async-queue-configs.md` | deploy-async |
+| `async-python-library.md` | deploy-async |
+| `async-sidecar-deploy.md` | deploy-async |
 
 ## Composability
 
-- **Find workspace first**: Use `workspaces` skill
-- **Save workspace for next time**: Use `preferences` skill to remember default workspace
+- **Find workspace**: Use `workspaces` skill
 - **Check what's deployed**: Use `applications` skill
-- **View deploy logs**: Use `logs` skill
-- **Manage secrets**: Use `secrets` skill before deploy to set up secret groups
-- **Test after deployment**: Use `service-test` skill to validate the service is healthy
+- **View logs**: Use `logs` skill
+- **Manage secrets**: Use `secrets` skill
+- **Deploy Helm charts**: Use `helm` skill
+- **Deploy LLMs**: Use `llm-deploy` skill
+- **Test after deploy**: Use `service-test` skill
+- **Save preferences**: Use `preferences` skill
 
-</references>
+## Success Criteria
 
-<troubleshooting>
-
-## Error Handling
-
-For specific error messages and resolution steps, see `references/deploy-errors.md`. Covers:
-- `TFY_WORKSPACE_FQN` not set
-- `tfy: command not found` -- install with `pip install truefoundry`
-- `tfy apply` validation errors -- check YAML syntax and required fields
-- "Host not configured in cluster"
-- Git build failures
-- No Dockerfile found
-
-</troubleshooting>
-</output>
+- User confirmed service name, resources, port, and deployment source before deploying
+- Deployment URL and status reported back to the user
+- Health probes configured for production deployments
+- Secrets stored securely (not hardcoded in manifests)
+- For multi-service: all services wired together and working end-to-end

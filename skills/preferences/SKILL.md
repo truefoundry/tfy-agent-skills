@@ -66,7 +66,7 @@ expose_services: false
 # Default secret group for new deployments
 secret_group: ""
 
-# App name prefix — prepended to all service names in multi-service deployments
+# App name prefix — prepended to all service names in deploy skill multi-service workflow
 app_prefix: ""
 
 # Preferred base domain (if cluster has multiple)
@@ -172,17 +172,17 @@ mkdir -p ~/.config/truefoundry
 
 | Key | Type | What It Controls | Used By Skills |
 |-----|------|-----------------|----------------|
-| `workspace_fqn` | string | Default deploy target | deploy, multi-service, helm, llm-deploy |
-| `environment` | string | dev/staging/prod — affects resources and naming | deploy, multi-service |
-| `resources.dev` | object | CPU/memory defaults for dev deployments | deploy, multi-service |
-| `resources.prod` | object | CPU/memory defaults for prod deployments | deploy, multi-service |
-| `naming` | string | Service naming convention | multi-service |
-| `expose_services` | bool | Default public/internal exposure | deploy, multi-service |
-| `secret_group` | string | Default secret group name | deploy, multi-service, secrets |
-| `app_prefix` | string | Prefix for service names | multi-service |
-| `base_domain` | string | Preferred base domain for public URLs | deploy, multi-service |
-| `compose.db_storage` | string | Default DB persistence size | multi-service |
-| `compose.redis_architecture` | string | Redis standalone vs. replication | multi-service |
+| `workspace_fqn` | string | Default deploy target | deploy, helm, llm-deploy |
+| `environment` | string | dev/staging/prod — affects resources and naming | deploy |
+| `resources.dev` | object | CPU/memory defaults for dev deployments | deploy |
+| `resources.prod` | object | CPU/memory defaults for prod deployments | deploy |
+| `naming` | string | Service naming convention | deploy |
+| `expose_services` | bool | Default public/internal exposure | deploy |
+| `secret_group` | string | Default secret group name | deploy, secrets |
+| `app_prefix` | string | Prefix for service names | deploy |
+| `base_domain` | string | Preferred base domain for public URLs | deploy |
+| `compose.db_storage` | string | Default DB persistence size | deploy |
+| `compose.redis_architecture` | string | Redis standalone vs. replication | deploy |
 
 ## Integration with Other Skills
 

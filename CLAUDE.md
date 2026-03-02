@@ -46,7 +46,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 ```
 
 - `description` controls when the agent auto-invokes the skill (model-invoked).
-- The explicit-only skills are: `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`.
+- The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
 - `allowed-tools` grants the skill permission to run specific commands without prompting.
 
 ### Shared files
@@ -119,7 +119,7 @@ Skills follow the [Agent Skills](https://agentskills.io) open format. Frontmatte
 | `name` | Yes | Skill identifier, used for install prefix |
 | `description` | Yes | Trigger phrases for model invocation |
 | `allowed-tools` | Yes | Auto-approved tool patterns |
-| `disable-model-invocation` | Yes | Opt-out of auto-triggering (deploy, helm, llm-deploy, async-service, multi-service) |
+| `disable-model-invocation` | Yes | Opt-out of auto-triggering (deploy, helm, llm-deploy) |
 
 Optional fields to consider adding:
 

@@ -95,7 +95,7 @@ For Helm charts, use short names that don't repeat the chart type:
 
 Get the workspace namespace for DNS construction:
 ```bash
-TFY_API_SH=~/.claude/skills/truefoundry-multi-service/scripts/tfy-api.sh
+TFY_API_SH=~/.claude/skills/truefoundry-deploy/scripts/tfy-api.sh
 $TFY_API_SH GET '/api/svc/v1/workspace?workspaceFqn=WORKSPACE_FQN'
 ```
 The namespace is typically the workspace name from the FQN.
@@ -269,9 +269,9 @@ Level 2: myapp-frontend (depends on backend)
 ```bash
 tfy apply -f tfy-manifest-cache.yaml
 # Wait for redis to be ready...
-tfy apply -f tfy-manifest-backend.yaml
+tfy deploy -f tfy-manifest-backend.yaml --no-wait
 # Wait for backend to be ready...
-tfy apply -f tfy-manifest-frontend.yaml
+tfy deploy -f tfy-manifest-frontend.yaml --no-wait
 ```
 
 ### Example: Compose with backend + PostgreSQL + Redis
