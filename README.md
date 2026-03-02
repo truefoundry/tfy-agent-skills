@@ -1,6 +1,6 @@
 # TrueFoundry Agent Skills
 
-Agent skills for [TrueFoundry](https://truefoundry.com) following the [Agent Skills](https://agentskills.io) open format. 24 skills that let AI coding assistants deploy, monitor, and manage ML infrastructure.
+Agent skills for [TrueFoundry](https://truefoundry.com) following the [Agent Skills](https://agentskills.io) open format. 22 skills that let AI coding assistants deploy, monitor, and manage ML infrastructure.
 
 Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, Cline, and Roo Code.
 

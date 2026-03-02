@@ -10,12 +10,12 @@ matching each skill description. Each skill lives in `skills/{name}/SKILL.md`.
 
 Read `skills/{name}/SKILL.md` for detailed usage, examples, and error handling.
 
-The explicit-only skills are: `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`.
+The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
 
 Available skills in this repo:
+- `access-tokens`
 - `ai-gateway`
 - `applications`
-- `async-service`
 - `deploy`
 - `docs`
 - `gitops`
@@ -23,7 +23,7 @@ Available skills in this repo:
 - `jobs`
 - `llm-deploy`
 - `logs`
-- `multi-service`
+- `ml-repos`
 - `notebooks`
 - `preferences`
 - `prompts`
@@ -31,7 +31,7 @@ Available skills in this repo:
 - `service-test`
 - `ssh-server`
 - `status`
-- `tfy-apply`
+- `tracing`
 - `volumes`
 - `workflows`
 - `workspaces`
