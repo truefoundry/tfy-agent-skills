@@ -23,4 +23,7 @@ Project maintainers are responsible for clarifying and enforcing this Code of Co
 
 ## Reporting
 
-If you experience or witness unacceptable behavior, report it through repository maintainers or your standard TrueFoundry support channel.
+If you experience or witness unacceptable behavior:
+
+- For community interactions in this repository, open an issue requesting maintainer follow-up (do not include sensitive personal details publicly).
+- For enterprise engagements, use your standard TrueFoundry support channel.

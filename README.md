@@ -4,6 +4,12 @@ Agent skills for [TrueFoundry](https://truefoundry.com) following the [Agent Ski
 
 Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, Cline, and Roo Code.
 
+## Requirements
+
+- Access to a TrueFoundry account/workspace
+- `TFY_BASE_URL` and `TFY_API_KEY` credentials
+- Any supported coding agent listed above
+
 ## Quick Start
 
 ```bash

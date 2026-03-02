@@ -5,6 +5,7 @@
 For usage questions and troubleshooting:
 - Open a GitHub issue in this repository.
 - Include the skill name, exact command/query, and relevant logs/output.
+- Use the issue template that best matches your problem (bug report or feature request).
 
 For enterprise customers:
 - Use your existing TrueFoundry support channel for production-impacting issues.

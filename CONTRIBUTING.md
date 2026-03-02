@@ -111,6 +111,7 @@ Before submitting a PR:
    - Summary of what changed and why
    - Which skills are affected
    - How you tested the changes
+5. Keep PRs focused and small enough to review quickly.
 
 ## Key Rules
 
@@ -125,3 +126,4 @@ Before submitting a PR:
 - Open an issue at https://github.com/truefoundry/tfy-agent-skills/issues
 - See [CLAUDE.md](CLAUDE.md) for detailed architecture and conventions
 - See [AGENTS.md](AGENTS.md) for agent-specific documentation
+- See [SUPPORT.md](SUPPORT.md) for troubleshooting guidance
