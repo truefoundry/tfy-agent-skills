@@ -1,6 +1,6 @@
 ---
 name: applications
-description: Lists, inspects, and manages TrueFoundry application deployments. Shows status, health, and details for services, jobs, and Helm releases. Also handles requests to delete, remove, or destroy applications by directing users to the TrueFoundry UI. NOT for deploying code (use deploy skill).
+description: Lists, inspects, and manages TrueFoundry application deployments. Shows status, health, and details for services, jobs, and Helm releases. Also handles requests to delete, remove, or destroy applications by directing users to the TrueFoundry UI. NOT for deploying code (use `deploy` skill).
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(*/tfy-api.sh *)

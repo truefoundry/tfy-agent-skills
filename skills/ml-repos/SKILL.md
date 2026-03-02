@@ -1,6 +1,6 @@
 ---
 name: ml-repos
-description: Browses TrueFoundry ML repositories and model registry. Lists repos, models, and artifacts with FQNs for use in other skills. NOT for deploying models (use llm-deploy skill).
+description: Browses TrueFoundry ML repositories and model registry. Lists repos, models, and artifacts with FQNs for use in other skills. NOT for deploying models (use `llm-deploy` skill).
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(*/tfy-api.sh *)

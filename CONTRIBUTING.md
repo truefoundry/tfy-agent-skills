@@ -89,12 +89,18 @@ Before submitting a PR:
    shellcheck scripts/*.sh hooks/auto-approve-tfy-api.sh skills/_shared/scripts/*.sh
    ```
 
-2. Run the installer to verify skills install correctly:
+2. Run validation and failure-mode tests:
+   ```bash
+   ./scripts/validate-skills.sh
+   ./scripts/test-tfy-api.sh
+   ```
+
+3. Run the installer to verify skills install correctly:
    ```bash
    ./scripts/install.sh
    ```
 
-3. Spot-check modified skills by reading them end-to-end for coherence.
+4. Spot-check modified skills by reading them end-to-end for coherence.
 
 ## Submitting Changes
 

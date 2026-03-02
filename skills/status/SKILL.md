@@ -100,7 +100,7 @@ Get an API key: https://docs.truefoundry.com/docs/generating-truefoundry-api-key
 - The agent has tested the API connection with a lightweight call and reported the result
 - The user can see a clear status summary showing which components are configured and which are missing
 - The agent has provided actionable next steps if any credential or connectivity issue was found
-- The user knows which skill to use next based on their goal (deploy, list workspaces, etc.)
+- The user knows which skill to use next based on their goal (`deploy`, list workspaces, etc.)
 
 </success_criteria>
 

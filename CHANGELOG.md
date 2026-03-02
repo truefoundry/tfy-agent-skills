@@ -12,6 +12,7 @@ All notable changes to this project are documented in this file.
 ### Changed
 - Hardened `skills/_shared/scripts/tfy-api.sh` to fail on HTTP errors and use stricter shell settings.
 - CI now enforces validation and runtime tests.
+- Updated docs for OSS readiness: corrected shared reference file list in `AGENTS.md`, expanded testing steps in `CONTRIBUTING.md`, improved PR checklist accuracy, and added policy links in `README.md`.
 
 ### Fixed
 - Consistent explicit-only skill policy across docs.

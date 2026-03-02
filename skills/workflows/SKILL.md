@@ -341,7 +341,7 @@ After deployment, monitor runs through:
 - The user has a workflow file with properly decorated @task and @workflow functions
 - The agent has confirmed that all @task functions include truefoundry[workflow] in their pip_packages
 - The workflow was successfully deployed to the specified workspace using `tfy deploy workflow` (or `tfy apply` as alternative)
-- The user can monitor workflow runs via the dashboard or applications skill
+- The user can monitor workflow runs via the dashboard or `applications` skill
 - The agent has set up a cron schedule if the user requested recurring execution
 
 </success_criteria>
@@ -390,7 +390,7 @@ The truefoundry[workflow] package is required for defining tasks and workflows:
 ```
 TFY_WORKSPACE_FQN is required. Get it from:
 - TrueFoundry dashboard -> Workspaces
-- Or use the workspaces skill to list available workspaces
+- Or use the `workspaces` skill to list available workspaces
 Do not auto-pick a workspace.
 ```
 

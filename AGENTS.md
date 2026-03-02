@@ -94,8 +94,8 @@ Edit canonical files in `_shared/`, then run:
 Shared files:
 - `skills/_shared/scripts/tfy-api.sh` — REST API helper
 - `skills/_shared/references/api-endpoints.md` — Endpoint reference
-- `skills/_shared/references/deploy-template.py` — Deploy script template
-- `skills/_shared/references/sdk-patterns.md` — SDK usage patterns
+- `skills/_shared/references/manifest-schema.md` — Complete manifest schema reference
+- `skills/_shared/references/manifest-defaults.md` — Default values and templates
 
 ## Adding New Skills
 

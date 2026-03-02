@@ -1,6 +1,6 @@
 ---
 name: gitops
-description: Sets up GitOps CI/CD pipelines for TrueFoundry using tfy apply. Supports GitHub Actions, GitLab CI, and Bitbucket Pipelines. NOT for manual deploys (use deploy skill).
+description: Sets up GitOps CI/CD pipelines for TrueFoundry using tfy apply. Supports GitHub Actions, GitLab CI, and Bitbucket Pipelines. NOT for manual deploys (use `deploy` skill).
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(*/tfy-api.sh *)

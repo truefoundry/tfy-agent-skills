@@ -1,6 +1,6 @@
 # TrueFoundry Agent Skills
 
-Agent skills for [TrueFoundry](https://truefoundry.com) following the [Agent Skills](https://agentskills.io) open format. 22 skills that let AI coding assistants deploy, monitor, and manage ML infrastructure.
+Agent skills for [TrueFoundry](https://truefoundry.com) following the [Agent Skills](https://agentskills.io) open format. A curated set of skills that let AI coding assistants deploy, monitor, and manage ML infrastructure.
 
 Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, Cline, and Roo Code.
 
@@ -15,6 +15,16 @@ export TFY_API_KEY="tfy-..."
 Keep secrets local only. Do not commit `.env` or API keys to Git.
 
 Restart your agent, then ask things like *"deploy my FastAPI app"*, *"show logs for my-service"*, or *"what's deployed?"*
+
+### Optional: Auto-Approve API Calls (Claude Code only)
+
+By default, Claude Code prompts for approval each time a skill runs `tfy-api.sh`. To auto-approve these calls, copy the hooks into your Claude Code config:
+
+```bash
+cp -r hooks/ ~/.claude/hooks/
+```
+
+This installs a `PreToolUse` hook that validates and auto-approves only `tfy-api.sh` and `tfy-version.sh` commands. It rejects command chaining and shell injection patterns. All other commands still require manual approval.
 
 Example workflow:
 1. Ask: `is truefoundry connected?` (uses `status`)
@@ -55,6 +65,13 @@ Both use `TFY_BASE_URL` and `TFY_API_KEY`.
 ```
 
 Never edit files inside individual skill `scripts/` or `references/` that come from `_shared/`.
+
+## Project Policies
+
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Support](SUPPORT.md)
 
 ## License
 
