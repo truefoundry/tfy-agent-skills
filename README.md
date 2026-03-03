@@ -12,15 +12,22 @@ Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, Cline, and Roo Code.
 
 ## Quick Start
 
+Install skills:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/truefoundry/tfy-agent-skills/main/scripts/install.sh | bash
+```
+
+Set your credentials:
+
+```bash
 export TFY_BASE_URL="https://your-org.truefoundry.cloud"
 export TFY_API_KEY="tfy-..."
 ```
 
-Keep secrets local only. Do not commit `.env` or API keys to Git.
-
 Restart your agent, then ask things like *"deploy my FastAPI app"*, *"show logs for my-service"*, or *"what's deployed?"*
+
+> Keep secrets local only. Do not commit `.env` or API keys to Git.
 
 ### Optional: Auto-Approve API Calls (Claude Code only)
 
