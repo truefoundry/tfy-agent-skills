@@ -74,6 +74,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 - The repo root `skills/` directory is the source of truth for development.
 - Skills reference each other for composability (e.g. deploy tells users to check `workspaces` skill first). Common flows: `status → workspaces → deploy → applications`, `applications → logs`.
 - `TFY_WORKSPACE_FQN` is never auto-picked by any skill — always ask the user.
+- `TFY_CLUSTER_ID` is never set manually — list clusters and let the user pick one, then filter workspaces by that cluster.
 - When adding a new skill, include CLI-first instructions with direct API fallback, reference the `status` skill for preflight checks, and run `sync-shared.sh` afterward.
 
 ## Version Awareness

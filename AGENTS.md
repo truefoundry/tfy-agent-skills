@@ -74,8 +74,8 @@ Set via env vars or `.env` file.
 
 Common flows:
 
-- Deploy flow: `status` -> `workspaces` (find FQN) -> `deploy` -> `applications` (verify)
-- Infra flow: `status` -> `workspaces` (find FQN) -> `helm` (deploy database/redis) -> `applications` (verify)
+- Deploy flow: `status` -> `workspaces` (pick cluster, then workspace FQN) -> `deploy` -> `applications` (verify)
+- Infra flow: `status` -> `workspaces` (pick cluster, then workspace FQN) -> `helm` (deploy database/redis) -> `applications` (verify)
 - Debug flow: `applications` -> `logs` (check output)
 - Setup flow: `status` -> `secrets` (create groups) -> `deploy`
 

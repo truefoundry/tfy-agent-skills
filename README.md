@@ -41,7 +41,7 @@ This installs a `PreToolUse` hook that validates and auto-approves only `tfy-api
 
 Example workflow:
 1. Ask: `is truefoundry connected?` (uses `status`)
-2. Ask: `what workspaces are available?` (uses `workspaces`)
+2. Ask: `what clusters and workspaces are available?` (uses `workspaces` — lists clusters first, then workspaces)
 3. Ask: `show logs for my-service` (uses `logs`)
 
 ## Skills

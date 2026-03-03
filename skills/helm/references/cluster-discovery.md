@@ -1,11 +1,44 @@
 # Cluster Discovery
 
+## Interactive Cluster Selection
+
+**Never ask the user to set `TFY_CLUSTER_ID` manually.** Instead, list clusters and let the user pick one — just like workspace selection.
+
+### Flow
+
+1. List all clusters the user has access to
+2. Present a table and let the user choose
+3. Use the selected cluster ID to filter workspaces
+
+### Via Tool Call
+
+```
+tfy_clusters_list()
+```
+
+### Via Direct API
+
+```bash
+$TFY_API_SH GET /api/svc/v1/clusters
+```
+
+### Present as Table
+
+```
+Clusters:
+| Name             | ID               | Connected |
+|------------------|------------------|-----------|
+| prod-cluster     | prod-cluster     | Yes       |
+| dev-cluster      | dev-cluster      | Yes       |
+```
+
+Ask the user to pick one, then filter workspaces by that cluster ID.
+
 ## Extracting Cluster ID from Workspace FQN
 
 The cluster ID is the part before the colon in a workspace FQN:
 
 - `my-cluster:my-workspace` → cluster ID is `my-cluster`
-- Or use `TFY_CLUSTER_ID` from environment if set
 
 ## Fetching Cluster Details
 
@@ -35,7 +68,7 @@ The cluster API shows what GPU types are available. Only present available types
 
 If the cluster API returns 403 Forbidden or is otherwise unavailable:
 
-1. **Check `.env` for `TFY_CLUSTER_FQN`** — may already have the cluster info
+1. **List workspaces without cluster filter** — the workspace list itself shows which clusters are available (cluster ID is part of the FQN)
 2. **List existing apps in the workspace** and extract domain patterns from `ports[].host`:
    ```bash
    $TFY_API_SH GET "/api/svc/v1/apps?workspaceFqn=${TFY_WORKSPACE_FQN}&limit=5"

@@ -33,7 +33,6 @@ echo "TFY_WORKSPACE_FQN: ${TFY_WORKSPACE_FQN:-(not set)}"
 | `TFY_BASE_URL` | Yes | TrueFoundry platform URL (e.g., `https://your-org.truefoundry.cloud`) |
 | `TFY_API_KEY` | Yes | API key for authentication |
 | `TFY_WORKSPACE_FQN` | For deploys | Workspace fully qualified name (e.g., `cluster-id:workspace-name`) |
-| `TFY_CLUSTER_ID` | Optional | Cluster ID — auto-extracted from workspace FQN if not set |
 
 ### Variable Name Aliases
 

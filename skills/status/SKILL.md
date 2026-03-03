@@ -32,7 +32,6 @@ Verify TrueFoundry credentials and connectivity, or diagnose authentication issu
 |----------|-------------|---------|
 | `TFY_BASE_URL` | TrueFoundry platform URL | `https://your-org.truefoundry.cloud` |
 | `TFY_API_KEY` | API key (raw, no Bearer prefix) | `tfy-...` |
-| `TFY_CLUSTER_ID` | (optional) Default cluster ID | `my-cluster` |
 
 </context>
 
