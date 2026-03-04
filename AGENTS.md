@@ -10,7 +10,7 @@ matching each skill description. Each skill lives in `skills/{name}/SKILL.md`.
 
 Read `skills/{name}/SKILL.md` for detailed usage, examples, and error handling.
 
-The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
+Primary deployment skills are: `deploy`, `helm`, and `llm-deploy`.
 If intent is ambiguous, ask a short clarifying question before selecting one.
 
 Available skills in this repo:
@@ -42,13 +42,12 @@ Available skills in this repo:
 
 ## Architecture
 
-Execution order is:
+Skills are **CLI-first**:
 
-1. **MCP tool-call path (preferred for simple read operations)** -- For list/get/status calls (for example workspaces, clusters, applications, deployments, logs), invoke tool calls first.
-2. **CLI path (preferred for deploy/write operations)** -- Use `tfy` CLI commands (`tfy apply`, `tfy deploy workflow`, etc.) for deployment and infrastructure changes.
-3. **Direct API fallback** -- Use `scripts/tfy-api.sh` only when the tool-call path is unavailable or CLI is unavailable / missing the required operation. It reads `TFY_BASE_URL` and `TFY_API_KEY` from env or `.env`.
+**CLI path** — Prefer `tfy` CLI commands (`tfy apply`, `tfy deploy workflow`, etc.) for
+deployment and infrastructure workflows.
 
-If the MCP server is not configured or the tool call is unavailable, do not fail the task -- fall back automatically.
+**Direct API fallback** — Use `scripts/tfy-api.sh` only when CLI is unavailable or a required operation is not yet exposed in CLI. It reads `TFY_BASE_URL` and `TFY_API_KEY` from env or `.env`.
 
 **Script path:** Agents usually run commands from the project root, not the skill
 directory. Invoke `tfy-api.sh` with a full path or `cd` into the skill directory first.
@@ -94,17 +93,7 @@ For example, "deploy Postgres" can mean:
 - Helm chart infrastructure deployment (`helm` skill)
 - Containerized service deployment (`deploy` skill, prebuilt image or source build)
 
-Routing rule:
-- If the user explicitly says `docker`, `container`, `image`, or `dockerfile`, choose the containerized `deploy` path.
-- If the user explicitly says `helm` or `chart`, choose the `helm` path.
-- If neither is specified, ask one short clarifying question and proceed with the user's choice.
-
-## Post-Deploy Verification
-
-Deployment verification is mandatory and automatic:
-- After every deploy/apply action, immediately perform at least one status check.
-- Do this without asking an extra "should I verify?" prompt.
-- Prefer MCP read tool calls for verification; fall back to CLI/API when unavailable.
+When the user does not specify strategy, ask a short clarifying question and proceed with their choice.
 
 ## Shared Files
 
@@ -128,7 +117,7 @@ Shared files:
 ## Adding New Skills
 
 1. Create `skills/{name}/SKILL.md` with YAML frontmatter
-2. Include MCP-first read/list instructions, CLI guidance for deploy/write, and direct API fallback where needed
+2. Include CLI-first instructions and direct API fallback where needed
 3. Reference the `status` skill for preflight checks
 4. Run `./scripts/sync-shared.sh` to copy shared files
 5. Test locally with `./scripts/install.sh` and reload your agent

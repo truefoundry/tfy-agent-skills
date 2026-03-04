@@ -25,11 +25,10 @@ Skills work across Claude Code, Cursor, OpenAI Codex, and OpenCode.
 
 ### Deployment modes
 
-Deploy skills use this execution order:
+Deploy skills use a CLI-first approach with REST API as fallback:
 
-1. **MCP tool calls first for simple reads** — For list/get/status operations, use `tfy_*` tool calls first.
-2. **CLI for deploy/write** — Use `tfy apply` / `tfy deploy` for deployment changes.
-3. **REST API fallback** — When tool calls or CLI are unavailable, convert YAML to JSON and use `tfy-api.sh`. See `cli-fallback.md`.
+1. **CLI** (`tfy apply`) — Primary. Write a YAML manifest and apply it. Works everywhere `tfy` CLI is installed.
+2. **REST API** (fallback) — When CLI is unavailable, convert YAML to JSON and use `tfy-api.sh`. See `cli-fallback.md`.
 
 All modes use `TFY_BASE_URL` and `TFY_API_KEY` from env or `.env`.
 
@@ -47,7 +46,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 ```
 
 - `description` controls when the agent auto-invokes the skill (model-invoked).
-- The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
+- Primary deployment skills are: `deploy`, `helm`, and `llm-deploy`.
 - If intent is ambiguous, ask a short clarifying question before selecting one.
 - `allowed-tools` grants the skill permission to run specific commands without prompting.
 
@@ -78,7 +77,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 - Skills reference each other for composability (e.g. deploy tells users to check `workspaces` skill first). Common flows: `status → workspaces → deploy → applications`, `applications → logs`.
 - `TFY_WORKSPACE_FQN` is never auto-picked by any skill — always ask the user.
 - `TFY_CLUSTER_ID` is never set manually — list clusters and let the user pick one, then filter workspaces by that cluster.
-- When adding a new skill, include MCP-first guidance for read/list operations, CLI guidance for deploy/write operations, and direct API fallback; reference the `status` skill for preflight checks; then run `sync-shared.sh`.
+- When adding a new skill, include CLI-first instructions with direct API fallback, reference the `status` skill for preflight checks, and run `sync-shared.sh` afterward.
 
 ## Version Awareness
 

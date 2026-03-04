@@ -45,5 +45,4 @@ Do you want runtime logs for debugging, or deployment/pod status only?
 
 - If user says "production-ready database", recommend Helm first.
 - If user says "quick local test", recommend the simpler path with fewer required inputs.
-- If user says "docker", "container image", "dockerfile", or similar for a database deploy, choose the containerized `deploy` path directly (do not default to Helm).
 - If the user mentions an exact tool (for example, "helm", "gitops", "tfy apply"), honor it directly.
