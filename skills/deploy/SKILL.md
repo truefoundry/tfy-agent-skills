@@ -24,6 +24,7 @@ Route user intent to the right deployment workflow. Load only the references you
 | "async service", "queue consumer", "worker" | Async/queue service | [deploy-async.md](references/deploy-async.md) |
 | "deploy LLM", "serve model" | Model serving intent (may be ambiguous) | Ask user: dedicated model serving (`llm-deploy`) or generic service deploy (`deploy`) |
 | "deploy helm chart" | Helm chart intent | Confirm Helm path and collect chart details, then proceed with `helm` workflow |
+| "deploy postgres docker", "dockerized postgres", "deploy redis docker", "database in docker/container" | Containerized database intent | Proceed with `deploy` workflow (do not route to Helm) |
 | "deploy database", "deploy postgres", "deploy redis" | Ambiguous infra intent | Ask user: Helm chart (`helm`) or containerized service (`deploy`) |
 
 **Load only the reference file matching the user's intent.** Do not preload all references.
@@ -102,6 +103,23 @@ bash $TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationNam
 ```
 
 Or use the `applications` skill.
+
+## Post-Deploy Verification (Automatic)
+
+After any successful deploy/apply action, verify deployment status automatically without asking an extra prompt.
+
+Preferred verification path:
+1. Use MCP/MTP tool call first:
+```
+tfy_applications_list(filters={"workspace_fqn": "WORKSPACE_FQN", "application_name": "SERVICE_NAME"})
+```
+2. If MCP/MTP tool calls are unavailable, fall back to:
+```bash
+TFY_API_SH=~/.claude/skills/truefoundry-deploy/scripts/tfy-api.sh
+bash $TFY_API_SH GET '/api/svc/v1/apps?workspaceFqn=WORKSPACE_FQN&applicationName=SERVICE_NAME'
+```
+
+Always report the observed status (`BUILDING`, `DEPLOYING`, `RUNNING`, `FAILED`, etc.) in the same response.
 
 ### REST API fallback (when CLI unavailable)
 
@@ -185,6 +203,7 @@ These references are available for all workflows — load as needed:
 
 - User confirmed service name, resources, port, and deployment source before deploying
 - Deployment URL and status reported back to the user
+- Deployment status verified automatically immediately after apply/deploy (no extra prompt)
 - Health probes configured for production deployments
 - Secrets stored securely (not hardcoded in manifests)
 - For multi-service: all services wired together and working end-to-end

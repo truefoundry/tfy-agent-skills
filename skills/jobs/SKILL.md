@@ -285,11 +285,11 @@ Do this automatically after deploy, without asking an extra verification prompt.
 ### Check Job Status
 
 ```text
-# Preferred (MCP tool call)
+# Preferred (MCP/MTP tool call)
 tfy_applications_list(filters={"workspace_fqn": "WORKSPACE_FQN", "application_name": "JOB_NAME"})
 ```
 
-If MCP tool calls are unavailable, use API fallback:
+If MCP/MTP tool calls are unavailable, use API fallback:
 
 ```bash
 TFY_API_SH=~/.claude/skills/truefoundry-jobs/scripts/tfy-api.sh

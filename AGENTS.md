@@ -42,12 +42,13 @@ Available skills in this repo:
 
 ## Architecture
 
-Skills are **CLI-first**:
+Execution order is:
 
-**CLI path** — Prefer `tfy` CLI commands (`tfy apply`, `tfy deploy workflow`, etc.) for
-deployment and infrastructure workflows.
+1. **MCP/MTP tool-call path (preferred for simple read operations)** -- For list/get/status calls (for example workspaces, clusters, applications, deployments, logs), invoke tool calls first.
+2. **CLI path (preferred for deploy/write operations)** -- Use `tfy` CLI commands (`tfy apply`, `tfy deploy workflow`, etc.) for deployment and infrastructure changes.
+3. **Direct API fallback** -- Use `scripts/tfy-api.sh` only when the tool-call path is unavailable or CLI is unavailable / missing the required operation. It reads `TFY_BASE_URL` and `TFY_API_KEY` from env or `.env`.
 
-**Direct API fallback** — Use `scripts/tfy-api.sh` only when CLI is unavailable or a required operation is not yet exposed in CLI. It reads `TFY_BASE_URL` and `TFY_API_KEY` from env or `.env`.
+If the MCP/MTP server is not configured or the tool call is unavailable, do not fail the task -- fall back automatically.
 
 **Script path:** Agents usually run commands from the project root, not the skill
 directory. Invoke `tfy-api.sh` with a full path or `cd` into the skill directory first.
@@ -93,7 +94,17 @@ For example, "deploy Postgres" can mean:
 - Helm chart infrastructure deployment (`helm` skill)
 - Containerized service deployment (`deploy` skill, prebuilt image or source build)
 
-When the user does not specify strategy, ask a short clarifying question and proceed with their choice.
+Routing rule:
+- If the user explicitly says `docker`, `container`, `image`, or `dockerfile`, choose the containerized `deploy` path.
+- If the user explicitly says `helm` or `chart`, choose the `helm` path.
+- If neither is specified, ask one short clarifying question and proceed with the user's choice.
+
+## Post-Deploy Verification
+
+Deployment verification is mandatory and automatic:
+- After every deploy/apply action, immediately perform at least one status check.
+- Do this without asking an extra "should I verify?" prompt.
+- Prefer MCP/MTP read tool calls for verification; fall back to CLI/API when unavailable.
 
 ## Shared Files
 
@@ -117,7 +128,7 @@ Shared files:
 ## Adding New Skills
 
 1. Create `skills/{name}/SKILL.md` with YAML frontmatter
-2. Include CLI-first instructions and direct API fallback where needed
+2. Include MCP/MTP-first read/list instructions, CLI guidance for deploy/write, and direct API fallback where needed
 3. Reference the `status` skill for preflight checks
 4. Run `./scripts/sync-shared.sh` to copy shared files
 5. Test locally with `./scripts/install.sh` and reload your agent
