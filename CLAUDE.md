@@ -46,7 +46,8 @@ allowed-tools: Bash(*/tfy-api.sh *)
 ```
 
 - `description` controls when the agent auto-invokes the skill (model-invoked).
-- The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
+- Primary deployment skills are: `deploy`, `helm`, and `llm-deploy`.
+- If intent is ambiguous, ask a short clarifying question before selecting one.
 - `allowed-tools` grants the skill permission to run specific commands without prompting.
 
 ### Shared files
@@ -58,6 +59,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 - `_shared/references/manifest-schema.md` — complete YAML manifest field reference (single source of truth)
 - `_shared/references/manifest-defaults.md` — per-service-type defaults with YAML templates
 - `_shared/references/cli-fallback.md` — CLI detection and REST API fallback pattern
+- `_shared/references/intent-clarification.md` — reusable prompts for resolving ambiguous user intents
 
 **Never edit files inside individual skill `scripts/` or `references/` directories.** Edit `_shared/`, then run `./scripts/sync-shared.sh`. The install script symlinks `_shared/` into each installed skill; `sync-shared.sh` copies files for the dev layout.
 

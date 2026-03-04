@@ -8,6 +8,8 @@ metadata:
 allowed-tools: Bash(tfy*) Bash(*/tfy-api.sh *) Bash(*/tfy-version.sh *) Bash(docker *) Bash(tfy deploy*)
 ---
 
+> Routing note: For ambiguous user intents, use the shared clarification templates in [references/intent-clarification.md](references/intent-clarification.md).
+
 # Deploy to TrueFoundry
 
 Route user intent to the right deployment workflow. Load only the references you need.
@@ -20,8 +22,9 @@ Route user intent to the right deployment workflow. Load only the references you
 | "tfy apply", "apply manifest", "deploy from yaml" | Declarative manifest apply | [deploy-apply.md](references/deploy-apply.md) |
 | "deploy everything", "full stack", docker-compose | Multi-service orchestration | [deploy-multi.md](references/deploy-multi.md) |
 | "async service", "queue consumer", "worker" | Async/queue service | [deploy-async.md](references/deploy-async.md) |
-| "deploy LLM", "serve model" | LLM model serving | Use `llm-deploy` skill |
-| "deploy helm chart", "deploy database" | Helm chart | Use `helm` skill |
+| "deploy LLM", "serve model" | Model serving intent (may be ambiguous) | Ask user: dedicated model serving (`llm-deploy`) or generic service deploy (`deploy`) |
+| "deploy helm chart" | Helm chart intent | Confirm Helm path and collect chart details, then proceed with `helm` workflow |
+| "deploy database", "deploy postgres", "deploy redis" | Ambiguous infra intent | Ask user: Helm chart (`helm`) or containerized service (`deploy`) |
 
 **Load only the reference file matching the user's intent.** Do not preload all references.
 

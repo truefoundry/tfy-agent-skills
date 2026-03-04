@@ -8,6 +8,8 @@ metadata:
 allowed-tools: Bash(tfy*) Bash(*/tfy-api.sh *) Bash(*/tfy-version.sh *)
 ---
 
+> Routing note: For ambiguous user intents, use the shared clarification templates in [references/intent-clarification.md](references/intent-clarification.md).
+
 <objective>
 
 # LLM / Model Deployment
@@ -29,9 +31,9 @@ Two paths:
 
 ## When NOT to Use
 
-- User wants to deploy a regular web app or API -> use `deploy` skill
-- User wants to deploy a database or Helm chart -> use `helm` skill
-- User wants to check what's deployed -> use `applications` skill
+- User wants to deploy a regular web app or API -> prefer `deploy` skill; ask if the user wants another valid path
+- User wants to deploy a database or Helm chart -> prefer `helm` skill; ask if the user wants another valid path
+- User wants to check what's deployed -> prefer `applications` skill; ask if the user wants another valid path
 
 </objective>
 

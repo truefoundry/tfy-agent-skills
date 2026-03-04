@@ -8,6 +8,8 @@ metadata:
 allowed-tools: Bash(tfy*) Bash(*/tfy-api.sh *)
 ---
 
+> Routing note: For ambiguous user intents, use the shared clarification templates in [references/intent-clarification.md](references/intent-clarification.md).
+
 <objective>
 
 # Helm Chart Deployment
@@ -21,7 +23,7 @@ Two paths:
 
 ## When to Use
 
-- User wants to deploy a database (PostgreSQL, MySQL, MongoDB, etc.)
+- User explicitly wants a Helm chart deployment for a database (PostgreSQL, MySQL, MongoDB, etc.)
 - User wants to install a cache (Redis, Memcached)
 - User wants to deploy a message queue (RabbitMQ, Kafka, NATS)
 - User says "install helm chart", "deploy via helm"
@@ -31,11 +33,15 @@ Two paths:
 - User has a custom/private Helm chart to deploy
 - User wants to deploy ANY infrastructure component available as a Helm chart
 
+If user intent is "deploy Postgres/Redis/database" without saying Helm, ask which strategy they want:
+- Helm chart infrastructure (`helm` skill)
+- Containerized service deployment (`deploy` skill)
+
 ## When NOT to Use
 
-- User wants to deploy application code -> use `deploy` skill
-- User wants to check what's deployed -> use `applications` skill
-- User wants to view logs -> use `logs` skill
+- User wants to deploy application code -> prefer `deploy` skill; ask if the user wants another valid path
+- User wants to check what's deployed -> prefer `applications` skill; ask if the user wants another valid path
+- User wants to view logs -> prefer `logs` skill; ask if the user wants another valid path
 
 </objective>
 

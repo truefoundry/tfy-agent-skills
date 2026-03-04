@@ -6,6 +6,8 @@ compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(tfy*) Bash(*/tfy-api.sh *)
 ---
 
+> Routing note: For ambiguous user intents, use the shared clarification templates in [references/intent-clarification.md](references/intent-clarification.md).
+
 <objective>
 
 # Jobs
@@ -26,7 +28,7 @@ Deploy, schedule, and monitor TrueFoundry job runs. Two paths:
 
 ## When NOT to Use
 
-- User wants to list job *applications* -> use `applications` skill with `application_type: "job"`
+- User wants to list job *applications* -> prefer `applications` skill; ask if the user wants another valid path with `application_type: "job"`
 
 </objective>
 

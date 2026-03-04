@@ -10,7 +10,8 @@ matching each skill description. Each skill lives in `skills/{name}/SKILL.md`.
 
 Read `skills/{name}/SKILL.md` for detailed usage, examples, and error handling.
 
-The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
+Primary deployment skills are: `deploy`, `helm`, and `llm-deploy`.
+If intent is ambiguous, ask a short clarifying question before selecting one.
 
 Available skills in this repo:
 - `access-control`
@@ -78,11 +79,21 @@ Set via env vars or `.env` file.
 Common flows:
 
 - Deploy flow: `status` -> `workspaces` (pick cluster, then workspace FQN) -> `deploy` -> `applications` (verify)
-- Infra flow: `status` -> `workspaces` (pick cluster, then workspace FQN) -> `helm` (deploy database/redis) -> `applications` (verify)
+- Infra flow: `status` -> `workspaces` (pick cluster, then workspace FQN) -> choose method (`helm` chart or `deploy` containerized service) -> `applications` (verify)
 - Debug flow: `applications` -> `logs` (check output)
 - Setup flow: `status` -> `secrets` (create groups) -> `deploy`
 - Access control flow: `status` -> `access-control` (create roles/teams) -> `deploy`/`mcp-servers`/`secrets` (assign collaborators)
 - MCP flow: `status` -> `workspaces` -> `mcp-servers` (register servers) -> `guardrails` (add safety rules)
+
+## Ambiguous Intents
+
+Do not hard-route requests that can map to multiple valid deployment strategies.
+
+For example, "deploy Postgres" can mean:
+- Helm chart infrastructure deployment (`helm` skill)
+- Containerized service deployment (`deploy` skill, prebuilt image or source build)
+
+When the user does not specify strategy, ask a short clarifying question and proceed with their choice.
 
 ## Shared Files
 
@@ -101,6 +112,7 @@ Shared files:
 - `skills/_shared/references/api-endpoints.md` — Endpoint reference
 - `skills/_shared/references/manifest-schema.md` — Complete manifest schema reference
 - `skills/_shared/references/manifest-defaults.md` — Default values and templates
+- `skills/_shared/references/intent-clarification.md` — Reusable clarification prompts for ambiguous intents
 
 ## Adding New Skills
 
