@@ -46,7 +46,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 ```
 
 - `description` controls when the agent auto-invokes the skill (model-invoked).
-- The explicit-only skills are: `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`.
+- The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
 - `allowed-tools` grants the skill permission to run specific commands without prompting.
 
 ### Shared files
@@ -74,6 +74,7 @@ allowed-tools: Bash(*/tfy-api.sh *)
 - The repo root `skills/` directory is the source of truth for development.
 - Skills reference each other for composability (e.g. deploy tells users to check `workspaces` skill first). Common flows: `status → workspaces → deploy → applications`, `applications → logs`.
 - `TFY_WORKSPACE_FQN` is never auto-picked by any skill — always ask the user.
+- `TFY_CLUSTER_ID` is never set manually — list clusters and let the user pick one, then filter workspaces by that cluster.
 - When adding a new skill, include CLI-first instructions with direct API fallback, reference the `status` skill for preflight checks, and run `sync-shared.sh` afterward.
 
 ## Version Awareness
@@ -119,7 +120,7 @@ Skills follow the [Agent Skills](https://agentskills.io) open format. Frontmatte
 | `name` | Yes | Skill identifier, used for install prefix |
 | `description` | Yes | Trigger phrases for model invocation |
 | `allowed-tools` | Yes | Auto-approved tool patterns |
-| `disable-model-invocation` | Yes | Opt-out of auto-triggering (deploy, helm, llm-deploy, async-service, multi-service) |
+| `disable-model-invocation` | Yes | Opt-out of auto-triggering (deploy, helm, llm-deploy) |
 
 Optional fields to consider adding:
 

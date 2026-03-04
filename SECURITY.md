@@ -6,7 +6,7 @@ If you discover a security vulnerability in this repository, please report it pr
 
 Preferred options:
 - Open a private GitHub security advisory for this repository.
-- If that is not available, open an issue and explicitly request a private follow-up channel before sharing details.
+- If that is not available, open a public issue that contains only a request for a private follow-up channel. Do not include exploit details in the public issue.
 - Existing TrueFoundry enterprise customers should use their standard support/escalation channel and mark the report as security-sensitive.
 
 Please include:

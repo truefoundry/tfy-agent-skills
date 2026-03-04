@@ -255,7 +255,7 @@ Routing configurations can be managed as YAML and applied via `tfy apply`:
 tfy apply -f gateway-routing-config.yaml
 ```
 
-See `tfy-apply` and `gitops` skills for CI/CD integration.
+See `deploy` skill (declarative apply workflow) and `gitops` skill for CI/CD integration.
 
 ## Rate Limiting
 
@@ -319,14 +319,7 @@ Export traces to your observability stack:
 
 ## Guardrails
 
-The gateway supports content filtering via integrated guardrail providers:
-
-- Azure PII / Content Safety
-- Enkrypt AI
-- Palo Alto Prisma
-- Custom guardrail implementations
-
-Configure via TrueFoundry dashboard → AI Gateway → Guardrails.
+For content filtering, PII detection, prompt injection prevention, and custom safety rules, use the `guardrails` skill. It configures guardrail providers and rules that apply to this gateway's traffic.
 
 ## Framework Integration
 
@@ -406,7 +399,7 @@ Usage:
 - **Deploy model first**: Use `llm-deploy` skill to deploy a self-hosted model, then add to gateway
 - **Need API key**: Create PAT/VAT in TrueFoundry dashboard → Access
 - **Rate limiting**: Configure in dashboard → AI Gateway → Rate Limiting
-- **Routing config**: Use `tfy-apply` skill to apply routing YAML via GitOps
+- **Routing config**: Use `deploy` skill (declarative apply workflow) to apply routing YAML via GitOps
 - **tool servers**: Use `deploy` skill to deploy tool servers (service with tool-proxy), register in gateway
 - **Check deployed models**: Use `applications` skill to see running model services
 - **Benchmark through gateway**: Use your preferred load-testing tool against gateway endpoints

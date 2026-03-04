@@ -89,12 +89,18 @@ Before submitting a PR:
    shellcheck scripts/*.sh hooks/auto-approve-tfy-api.sh skills/_shared/scripts/*.sh
    ```
 
-2. Run the installer to verify skills install correctly:
+2. Run validation and failure-mode tests:
+   ```bash
+   ./scripts/validate-skills.sh
+   ./scripts/test-tfy-api.sh
+   ```
+
+3. Run the installer to verify skills install correctly:
    ```bash
    ./scripts/install.sh
    ```
 
-3. Spot-check modified skills by reading them end-to-end for coherence.
+4. Spot-check modified skills by reading them end-to-end for coherence.
 
 ## Submitting Changes
 
@@ -105,6 +111,7 @@ Before submitting a PR:
    - Summary of what changed and why
    - Which skills are affected
    - How you tested the changes
+5. Keep PRs focused and small enough to review quickly.
 
 ## Key Rules
 
@@ -119,3 +126,4 @@ Before submitting a PR:
 - Open an issue at https://github.com/truefoundry/tfy-agent-skills/issues
 - See [CLAUDE.md](CLAUDE.md) for detailed architecture and conventions
 - See [AGENTS.md](AGENTS.md) for agent-specific documentation
+- See [SUPPORT.md](SUPPORT.md) for troubleshooting guidance

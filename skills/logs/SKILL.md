@@ -1,6 +1,6 @@
 ---
 name: logs
-description: Views, downloads, and searches application and job logs from TrueFoundry. Supports time-range filtering, pod filtering, and error search. NOT for deployment status (use applications skill).
+description: Views, downloads, and searches application and job logs from TrueFoundry. Supports time-range filtering, pod filtering, and error search. NOT for deployment status (use `applications` skill).
 license: MIT
 compatibility: Requires Bash, curl, and access to a TrueFoundry instance
 allowed-tools: Bash(*/tfy-api.sh *)

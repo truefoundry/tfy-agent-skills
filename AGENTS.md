@@ -10,20 +10,23 @@ matching each skill description. Each skill lives in `skills/{name}/SKILL.md`.
 
 Read `skills/{name}/SKILL.md` for detailed usage, examples, and error handling.
 
-The explicit-only skills are: `deploy`, `helm`, `llm-deploy`, `async-service`, and `multi-service`.
+The explicit-only skills are: `deploy`, `helm`, and `llm-deploy`.
 
 Available skills in this repo:
+- `access-control`
+- `access-tokens`
 - `ai-gateway`
 - `applications`
-- `async-service`
 - `deploy`
 - `docs`
 - `gitops`
+- `guardrails`
 - `helm`
 - `jobs`
 - `llm-deploy`
 - `logs`
-- `multi-service`
+- `mcp-servers`
+- `ml-repos`
 - `notebooks`
 - `preferences`
 - `prompts`
@@ -31,7 +34,7 @@ Available skills in this repo:
 - `service-test`
 - `ssh-server`
 - `status`
-- `tfy-apply`
+- `tracing`
 - `volumes`
 - `workflows`
 - `workspaces`
@@ -74,10 +77,12 @@ Set via env vars or `.env` file.
 
 Common flows:
 
-- Deploy flow: `status` -> `workspaces` (find FQN) -> `deploy` -> `applications` (verify)
-- Infra flow: `status` -> `workspaces` (find FQN) -> `helm` (deploy database/redis) -> `applications` (verify)
+- Deploy flow: `status` -> `workspaces` (pick cluster, then workspace FQN) -> `deploy` -> `applications` (verify)
+- Infra flow: `status` -> `workspaces` (pick cluster, then workspace FQN) -> `helm` (deploy database/redis) -> `applications` (verify)
 - Debug flow: `applications` -> `logs` (check output)
 - Setup flow: `status` -> `secrets` (create groups) -> `deploy`
+- Access control flow: `status` -> `access-control` (create roles/teams) -> `deploy`/`mcp-servers`/`secrets` (assign collaborators)
+- MCP flow: `status` -> `workspaces` -> `mcp-servers` (register servers) -> `guardrails` (add safety rules)
 
 ## Shared Files
 
@@ -94,8 +99,8 @@ Edit canonical files in `_shared/`, then run:
 Shared files:
 - `skills/_shared/scripts/tfy-api.sh` — REST API helper
 - `skills/_shared/references/api-endpoints.md` — Endpoint reference
-- `skills/_shared/references/deploy-template.py` — Deploy script template
-- `skills/_shared/references/sdk-patterns.md` — SDK usage patterns
+- `skills/_shared/references/manifest-schema.md` — Complete manifest schema reference
+- `skills/_shared/references/manifest-defaults.md` — Default values and templates
 
 ## Adding New Skills
 

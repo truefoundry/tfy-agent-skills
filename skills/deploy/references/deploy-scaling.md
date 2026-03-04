@@ -32,7 +32,7 @@ replicas: 1
 - `min: 2` ensures at least one pod is always available during rolling updates
 - `max` should be set based on cluster capacity and expected peak traffic
 - TrueFoundry auto-scales based on CPU utilization by default
-- Scale-to-zero is available for async services (see `async-service` skill)
+- Scale-to-zero is available for async services (see [deploy-async.md](deploy-async.md))
 
 See: [Autoscaling](https://truefoundry.com/docs/autoscaling-overview)
 

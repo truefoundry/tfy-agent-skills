@@ -293,7 +293,7 @@ The service may be internal-only (no host configured in ports).
 
 Options:
 - If this is intentional, the service can only be tested from within the cluster
-- To expose it publicly, redeploy with a host configured (use deploy skill)
+- To expose it publicly, redeploy with a host configured (use `deploy` skill)
 ```
 
 ### SSL/TLS Errors

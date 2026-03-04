@@ -20,33 +20,75 @@ List workspaces and clusters, find workspace FQNs for deployment, check cluster 
 
 <instructions>
 
-## List Workspaces
-
 When using direct API, set `TFY_API_SH` to the full path of this skill's `scripts/tfy-api.sh`. See `references/tfy-api-setup.md` for paths per agent.
 
-### Via Tool Call
+## Recommended Flow: Cluster → Workspace
+
+**Never ask users to set `TFY_CLUSTER_ID` manually.** Instead, list clusters and let the user pick — then filter workspaces by that cluster.
+
+### Step 1: List Clusters
 
 ```
-tfy_workspaces_list(filters={"cluster_id": "optional-cluster-id"})
+# Via Tool Call
+tfy_clusters_list()
+
+# Via Direct API
+$TFY_API_SH GET /api/svc/v1/clusters
 ```
 
-### Via Direct API
+Present as a table and ask the user to pick one:
 
-```bash
-# List all workspaces
+```
+Clusters:
+| Name             | ID               | Connected |
+|------------------|------------------|-----------|
+| prod-cluster     | prod-cluster     | Yes       |
+| dev-cluster      | dev-cluster      | Yes       |
+
+Which cluster would you like to use?
+```
+
+### Step 2: List Workspaces (Filtered by Cluster)
+
+Once the user picks a cluster, list workspaces filtered to that cluster:
+
+```
+# Via Tool Call
+tfy_workspaces_list(filters={"cluster_id": "selected-cluster-id"})
+
+# Via Direct API
+$TFY_API_SH GET '/api/svc/v1/workspaces?clusterId=SELECTED_CLUSTER_ID'
+```
+
+Present as a table and ask the user to pick one:
+
+```
+Workspaces in prod-cluster:
+| Name       | FQN                        |
+|------------|----------------------------|
+| dev-ws     | prod-cluster:dev-ws        |
+| staging-ws | prod-cluster:staging       |
+
+Which workspace would you like to use?
+```
+
+**Key field**: `fqn` — this is what `TFY_WORKSPACE_FQN` needs for deploy.
+
+### Shortcut: If Only One Cluster
+
+If the user has access to only one cluster, skip the cluster selection step — go straight to listing workspaces.
+
+## List All Workspaces (Unfiltered)
+
+```
+# Via Tool Call
+tfy_workspaces_list()
+
+# Via Direct API
 $TFY_API_SH GET /api/svc/v1/workspaces
-
-# Filter by cluster
-$TFY_API_SH GET '/api/svc/v1/workspaces?clusterId=CLUSTER_ID'
-
-# Filter by name
-$TFY_API_SH GET '/api/svc/v1/workspaces?name=my-workspace'
-
-# Filter by FQN
-$TFY_API_SH GET '/api/svc/v1/workspaces?fqn=my-cluster:my-workspace'
 ```
 
-### Get Specific Workspace
+## Get Specific Workspace
 
 ```bash
 # Via Tool Call
@@ -56,48 +98,16 @@ tfy_workspaces_list(workspace_id="ws-id-here")
 $TFY_API_SH GET /api/svc/v1/workspaces/WORKSPACE_ID
 ```
 
-## Presenting Workspaces
-
-Show as a table:
+## Get Cluster Details
 
 ```
-Workspaces:
-| Name       | FQN                        | Cluster          |
-|------------|----------------------------|------------------|
-| dev-ws     | my-cluster:dev-ws    | my-cluster |
-| staging-ws | my-cluster:staging   | my-cluster |
-```
-
-**Key field**: `fqn` — this is what `TFY_WORKSPACE_FQN` needs for deploy.
-
-## List Clusters
-
-### Via Tool Call
-
-```
-tfy_clusters_list()
+# Via Tool Call
 tfy_clusters_list(cluster_id="cluster-id")  # with status + addons
-```
 
-### Via Direct API
-
-```bash
-# List all clusters
-$TFY_API_SH GET /api/svc/v1/clusters
-
-# Get cluster details + status
+# Via Direct API
 $TFY_API_SH GET /api/svc/v1/clusters/CLUSTER_ID
 $TFY_API_SH GET /api/svc/v1/clusters/CLUSTER_ID/is-connected
 $TFY_API_SH GET /api/svc/v1/clusters/CLUSTER_ID/get-addons
-```
-
-## Presenting Clusters
-
-```
-Clusters:
-| Name             | ID               | Connected |
-|------------------|------------------|-----------|
-| my-cluster | my-cluster | Yes ✓     |
 ```
 
 ## Cluster Base Domains (for Public URLs)
@@ -155,8 +165,9 @@ For the full GPU type reference table and SDK usage examples, see `references/gp
 ### No Workspaces Found
 ```
 No workspaces found. Check:
-- TFY_CLUSTER_ID may be filtering to wrong cluster
+- The selected cluster may not have any workspaces
 - Your API key may not have access to this cluster
+- Try listing clusters first to pick a different one
 ```
 
 ### Permission Denied
