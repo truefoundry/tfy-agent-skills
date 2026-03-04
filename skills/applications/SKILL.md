@@ -28,6 +28,14 @@ List, inspect, or manage deployed applications and their deployment history. Als
 
 <instructions>
 
+## Execution Priority
+
+For simple read/list operations in this skill, always use MCP/MTP tool calls first:
+- `tfy_applications_list`
+- `tfy_applications_list_deployments`
+
+If tool calls are unavailable because the MCP/MTP server is not configured, or a tool is missing, fall back automatically to direct API via `tfy-api.sh`.
+
 ## IMPORTANT: Deleting Applications
 
 **Deletion is NOT supported via CLI, API, or any agent tool. Do NOT call any delete endpoint or attempt to delete applications programmatically.**

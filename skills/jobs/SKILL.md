@@ -280,8 +280,16 @@ $TFY_API_SH POST /api/svc/v1/jobs/JOB_ID/runs -d '{}'
 ## After Deploy -- Report Status
 
 **CRITICAL: Always report the deployment status and job details to the user.**
+Do this automatically after deploy, without asking an extra verification prompt.
 
 ### Check Job Status
+
+```text
+# Preferred (MCP/MTP tool call)
+tfy_applications_list(filters={"workspace_fqn": "WORKSPACE_FQN", "application_name": "JOB_NAME"})
+```
+
+If MCP/MTP tool calls are unavailable, use API fallback:
 
 ```bash
 TFY_API_SH=~/.claude/skills/truefoundry-jobs/scripts/tfy-api.sh
@@ -381,6 +389,7 @@ Job Runs for data-pipeline:
 - The job has been deployed to the target workspace and the user can see it in the TrueFoundry dashboard
 - The user has been provided the job ID and knows how to trigger runs (manually or via cron schedule)
 - The agent has reported the deployment status including job name, workspace, and trigger type
+- Deployment status is verified automatically immediately after apply/deploy (no extra prompt)
 - Job logs are accessible for monitoring via the `logs` skill or the dashboard
 - For scheduled jobs, the cron expression is confirmed and the user knows when the next run will execute
 

@@ -61,10 +61,11 @@ Skills are model-invoked — your agent picks the right one from your prompt. Th
 
 ## How It Works
 
-Each skill is a `SKILL.md` with YAML frontmatter + markdown instructions. Execution model is CLI-first:
+Each skill is a `SKILL.md` with YAML frontmatter + markdown instructions. Execution model is:
 
-- **Primary** — use `tfy` CLI commands (for example `tfy apply`) for deployment and management flows
-- **Fallback** — use bundled `tfy-api.sh` for REST API calls only when CLI is unavailable or missing a required operation
+- **Primary for simple read/list/status** — use MCP/MTP tool calls first (`tfy_*` tool calls like list workspaces, list apps, list deployments)
+- **Primary for deploy/write** — use `tfy` CLI commands (for example `tfy apply`)
+- **Fallback** — use bundled `tfy-api.sh` for REST API calls only when tool calls are unavailable or CLI is unavailable / missing a required operation
 
 Both use `TFY_BASE_URL` and `TFY_API_KEY`.
 
