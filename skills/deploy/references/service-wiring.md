@@ -118,7 +118,7 @@ When the compose file has credentials in connection strings, translate them too:
 DATABASE_URL=postgresql://postgres:mypass@db:5432/myapp
 
 # TFY (with same password set in Helm values.auth.postgresPassword)
-DATABASE_URL=postgresql://postgres:mypass@myapp-db-postgresql.sai-ws.svc.cluster.local:5432/myapp
+DATABASE_URL=postgresql://postgres:mypass@myapp-db-postgresql.your-workspace.svc.cluster.local:5432/myapp
 ```
 
 For production, store passwords in TrueFoundry secrets and reference them:
