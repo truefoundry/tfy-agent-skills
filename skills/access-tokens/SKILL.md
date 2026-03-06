@@ -73,6 +73,8 @@ $TFY_API_SH POST /api/svc/v1/personal-access-tokens '{"name":"my-token"}'
 
 **IMPORTANT:** The token value is returned ONLY in the creation response. Instruct the user to save it immediately — it cannot be retrieved later.
 
+**Security:** Store the token in a secure location (password manager, CI/CD secrets, or TrueFoundry secret group). Never commit tokens to Git, log them, or share them in plain text.
+
 Present the result:
 ```
 Token created successfully!
@@ -80,6 +82,7 @@ Name: my-token
 Token: tfy-XXXXXXXXXXXXXXXXXXXXXXXX
 
 ⚠️  Save this token now — it will not be shown again.
+Store it in a password manager or CI/CD secret store — never commit it to Git.
 ```
 
 ## Step 4: Delete Access Token

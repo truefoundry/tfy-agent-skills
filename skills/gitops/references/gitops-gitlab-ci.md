@@ -28,11 +28,11 @@ dry-run:
         - "**/*.yaml"
   script:
     - |
-      CHANGED=$(git diff --name-only origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME...HEAD -- '*.yaml')
-      for file in $CHANGED; do
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
         echo "Validating $file..."
         tfy apply --file "$file" --dry-run
-      done
+      done < <(git diff --name-only origin/"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"...HEAD -- '*.yaml')
 
 apply:
   <<: *tfy-setup
@@ -43,11 +43,11 @@ apply:
         - "**/*.yaml"
   script:
     - |
-      CHANGED=$(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
-      for file in $CHANGED; do
+      while IFS= read -r file; do
+        [ -z "$file" ] && continue
         echo "Applying $file..."
         tfy apply --file "$file"
-      done
+      done < <(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
 ```
 
 Set `TFY_HOST` and `TFY_API_KEY` as CI/CD variables in GitLab (Settings -> CI/CD -> Variables).
