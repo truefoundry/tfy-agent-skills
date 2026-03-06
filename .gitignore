@@ -5,3 +5,7 @@ __pycache__/
 .claude/
 .codex/
 .cursor/
+/AGENTS.md
+/agents.md
+/CLAUDE.md
+/claude.md
