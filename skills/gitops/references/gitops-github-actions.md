@@ -33,7 +33,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install TrueFoundry CLI
-        run: pip install truefoundry
+        run: pip install 'truefoundry>=0.5.0,<1.0'
 
       - name: Get changed files
         id: changed
@@ -92,7 +92,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install TrueFoundry CLI
-        run: pip install truefoundry
+        run: pip install 'truefoundry>=0.5.0,<1.0'
 
       - name: Apply changed specs
         env:

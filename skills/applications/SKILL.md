@@ -193,6 +193,11 @@ A basic TrueFoundry service manifest looks like this:
 
 ### Before Submitting
 
+> **Security: Credential Handling**
+> - NEVER embed raw API keys, passwords, or tokens in manifest `env` fields.
+> - Always use `tfy-secret://` references for sensitive environment variables.
+> - If the user provides a raw credential, warn them and suggest creating a TrueFoundry secret group first (use the `secrets` skill).
+
 **ALWAYS confirm with the user before creating a deployment:**
 
 1. **Service name** — What should the app be called?

@@ -184,6 +184,8 @@ $TFY_API_SH PUT /api/svc/v1/apps "$(cat mcp-server-virtual.yaml | yq -o json)"
 
 Wraps an OpenAPI specification as an MCP server. Supports up to 30 tools derived from API operations.
 
+> **Security: Remote OpenAPI specs are fetched at runtime and auto-converted into MCP tools that control agent capabilities. Only use trusted, verified spec URLs. For sensitive environments, prefer `spec.type: inline` to eliminate the runtime dependency on external endpoints.**
+
 ### Manifest (remote spec URL)
 
 ```yaml

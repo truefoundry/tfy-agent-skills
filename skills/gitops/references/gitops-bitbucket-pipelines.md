@@ -11,7 +11,7 @@ pipelines:
       - step:
           name: Validate TrueFoundry Specs
           script:
-            - pip install truefoundry
+            - pip install 'truefoundry>=0.5.0,<1.0'
             - |
               while IFS= read -r file; do
                 [ -z "$file" ] && continue
@@ -24,7 +24,7 @@ pipelines:
       - step:
           name: Apply TrueFoundry Specs
           script:
-            - pip install truefoundry
+            - pip install 'truefoundry>=0.5.0,<1.0'
             - |
               while IFS= read -r file; do
                 [ -z "$file" ] && continue

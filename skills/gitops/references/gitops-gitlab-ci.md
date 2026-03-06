@@ -17,7 +17,7 @@ cache:
 .tfy-setup: &tfy-setup
   image: python:3.12-slim
   before_script:
-    - pip install truefoundry
+    - pip install 'truefoundry>=0.5.0,<1.0'
 
 dry-run:
   <<: *tfy-setup

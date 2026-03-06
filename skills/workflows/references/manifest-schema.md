@@ -1198,6 +1198,8 @@ sample_inputs:
   - text: "What's the return policy for electronics?"
 ```
 
+> **Security:** `agent_card_url` and `hosted-a2a-agent` sources are fetched at runtime and can influence agent behavior. Only register agents from trusted, authenticated endpoints. Use `headers` with secret references for auth.
+
 ### A2A Agent Example
 
 ```yaml
@@ -1355,7 +1357,9 @@ Register an MCP server backed by an OpenAPI specification. TrueFoundry automatic
 
 ### Spec Source
 
-Provide the OpenAPI spec either as a remote URL or inline:
+Provide the OpenAPI spec either as a remote URL or inline.
+
+> **Security: Remote specs are fetched at runtime and converted into MCP tools that control agent capabilities. Only use trusted, verified URLs. Prefer `inline` specs for sensitive environments to avoid runtime dependency on external endpoints.**
 
 **Remote URL:**
 

@@ -71,18 +71,23 @@ tfy_access_tokens_create(payload={"name": "my-token"})
 $TFY_API_SH POST /api/svc/v1/personal-access-tokens '{"name":"my-token"}'
 ```
 
-**IMPORTANT:** The token value is returned ONLY in the creation response. Instruct the user to save it immediately — it cannot be retrieved later.
+**IMPORTANT:** The token value is returned ONLY in the creation response.
 
-**Security:** Store the token in a secure location (password manager, CI/CD secrets, or TrueFoundry secret group). Never commit tokens to Git, log them, or share them in plain text.
+> **Security: Token Display Policy**
+> - Display the token value exactly once from the API creation response so the user can copy it.
+> - After displaying, instruct the user to store it in a secure location immediately.
+> - The agent must NEVER store, log, or re-display the token value after the initial creation response.
+> - If the user asks to see the token again later, instruct them to create a new token.
 
 Present the result:
 ```
 Token created successfully!
 Name: my-token
-Token: tfy-XXXXXXXXXXXXXXXXXXXXXXXX
+Token: <value from API response — shown once>
 
-⚠️  Save this token now — it will not be shown again.
-Store it in a password manager or CI/CD secret store — never commit it to Git.
+⚠️  Save this token NOW — it will not be shown again.
+Store it in a password manager, CI/CD secret store, or TrueFoundry secret group.
+Never commit tokens to Git or share them in plain text.
 ```
 
 ## Step 4: Delete Access Token
