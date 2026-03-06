@@ -69,10 +69,12 @@ type: mcp-server/remote
 description: Production analytics MCP server
 url: https://analytics.example.com/mcp
 transport: streamable-http
+# SECURITY: Use tfy-secret:// references instead of hardcoding tokens in manifests.
+# Hardcoded tokens in YAML files risk exposure via Git history and CI logs.
 auth_data:
   type: header
   headers:
-    Authorization: "Bearer my-api-token"
+    Authorization: "Bearer tfy-secret://my-org:mcp-secrets:api-token"
 collaborators:
   - subject: user:jane@example.com
     role_id: admin
@@ -83,13 +85,13 @@ tags:
 
 ### Auth Options
 
-**Static header:**
+**Static header (use secret references — never hardcode tokens):**
 
 ```yaml
 auth_data:
   type: header
   headers:
-    Authorization: "Bearer my-api-token"
+    Authorization: "Bearer tfy-secret://my-org:mcp-secrets:api-token"
 ```
 
 **OAuth2:**
@@ -100,7 +102,7 @@ auth_data:
   authorization_url: https://auth.example.com/authorize
   token_url: https://auth.example.com/token
   client_id: my-client-id
-  client_secret: my-client-secret
+  client_secret: tfy-secret://my-org:mcp-secrets:oauth-client-secret
   jwt_source: access_token
   scopes:
     - read
@@ -108,7 +110,7 @@ auth_data:
   pkce: true
   dynamic_client_registration:
     registration_endpoint: https://auth.example.com/register
-    initial_access_token: registration-token
+    initial_access_token: tfy-secret://my-org:mcp-secrets:registration-token
 ```
 
 **Passthrough (forwards TFY credentials):**
@@ -181,6 +183,8 @@ $TFY_API_SH PUT /api/svc/v1/apps "$(cat mcp-server-virtual.yaml | yq -o json)"
 ## Register MCP Server (OpenAPI)
 
 Wraps an OpenAPI specification as an MCP server. Supports up to 30 tools derived from API operations.
+
+> **Security: Remote OpenAPI specs are fetched at runtime and auto-converted into MCP tools that control agent capabilities. Only use trusted, verified spec URLs. For sensitive environments, prefer `spec.type: inline` to eliminate the runtime dependency on external endpoints.**
 
 ### Manifest (remote spec URL)
 

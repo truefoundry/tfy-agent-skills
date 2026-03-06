@@ -419,7 +419,7 @@ Use the `secrets` skill to find or create the secret group.
 | `--max-model-len` | Model default | Max context length. Reduce to save GPU memory. |
 | `--gpu-memory-utilization` | `0.90` | Fraction of GPU memory to use (0.0-1.0) |
 | `--tensor-parallel-size` | `1` | Number of GPUs for tensor parallelism. Must match `GPU_COUNT`. |
-| `--trust-remote-code` | off | Required for some models (e.g., custom architectures) |
+| `--trust-remote-code` | off | Required for some models (e.g., custom architectures). **Security risk: executes arbitrary code from the model repo. Only enable for trusted models.** |
 | `--served-model-name` | model path | Name exposed in OpenAI API. Set to a clean name. |
 | `--root-path` | none | Use `$(TFY_SERVICE_ROOT_PATH)` for path-based routing |
 | `--async-scheduling` | off | Better throughput for concurrent requests |

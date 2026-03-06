@@ -57,8 +57,8 @@ case "$METHOD" in
     ;;
 esac
 
-if [[ "$API_PATH" != /* ]]; then
-  echo '{"error": "API_PATH must start with /"}' >&2
+if [[ "$API_PATH" != /* ]] || [[ "$API_PATH" == *..* ]]; then
+  echo '{"error": "API_PATH must start with / and must not contain path traversal (..)"}' >&2
   exit 1
 fi
 

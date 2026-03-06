@@ -217,10 +217,14 @@ ssh-keygen -t rsa
 
 Add your public key during deployment configuration, or after deployment:
 
+> **Security:** Only add SSH keys from trusted users. Each key grants full shell access to the dev environment. Review keys before adding them.
+
 ```bash
-# Connect and add key
+# Connect and add key — verify the public key belongs to the intended user
 mkdir -p /home/jovyan/.ssh
+chmod 700 /home/jovyan/.ssh
 echo "YOUR_PUBLIC_KEY_HERE" >> /home/jovyan/.ssh/authorized_keys
+chmod 600 /home/jovyan/.ssh/authorized_keys
 ```
 
 ### Multi-User Access
@@ -228,6 +232,7 @@ echo "YOUR_PUBLIC_KEY_HERE" >> /home/jovyan/.ssh/authorized_keys
 Add multiple authorized keys:
 
 ```bash
+# Only add keys for authorized team members
 echo "TEAMMATE_PUBLIC_KEY" >> /home/jovyan/.ssh/authorized_keys
 ```
 
@@ -290,8 +295,10 @@ Requires SSH server image v0.3.10+.
 
 Extend TrueFoundry's SSH server images:
 
+> **Security:** Custom Dockerfiles run as root during build. Only install packages from trusted sources. Pin package versions where possible to prevent supply-chain attacks.
+
 ```dockerfile
-FROM public.ecr.aws/truefoundrycloud/ssh-server:latest
+FROM public.ecr.aws/truefoundrycloud/ssh-server:0.4.5-py3.12.12
 
 USER root
 RUN DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \

@@ -80,9 +80,12 @@ $TFY_API_SH GET "/api/svc/v1/apps?workspaceFqn=${TFY_WORKSPACE_FQN}&applicationN
 
 ```bash
 pip install truefoundry
+
+# Interactive login (recommended — avoids exposing credentials in shell history)
 tfy login --host "${TFY_HOST:-${TFY_BASE_URL%/}}"
 
-# Or with API key (non-interactive, for CI/CD)
+# Non-interactive login for CI/CD (TFY_API_KEY must be a masked CI secret)
+# SECURITY: Avoid running this locally — the API key will appear in shell history.
 tfy login --host "${TFY_HOST:-${TFY_BASE_URL%/}}" --api-key "$TFY_API_KEY"
 ```
 

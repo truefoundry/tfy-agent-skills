@@ -33,7 +33,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install TrueFoundry CLI
-        run: pip install truefoundry
+        run: pip install 'truefoundry>=0.5.0,<1.0'
 
       - name: Get changed files
         id: changed
@@ -46,7 +46,8 @@ jobs:
           TFY_HOST: ${{ secrets.TFY_HOST }}
           TFY_API_KEY: ${{ secrets.TFY_API_KEY }}
         run: |
-          for file in ${{ steps.changed.outputs.files }}; do
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
             echo "Validating $file..."
 
             # Check valid YAML syntax
@@ -61,7 +62,7 @@ jobs:
 
             # Dry run validation
             tfy apply --file "$file" --dry-run
-          done
+          done <<< "${{ steps.changed.outputs.files }}"
 ```
 
 ## Workflow 2: Apply on Merge
@@ -91,7 +92,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install TrueFoundry CLI
-        run: pip install truefoundry
+        run: pip install 'truefoundry>=0.5.0,<1.0'
 
       - name: Apply changed specs
         env:
@@ -99,17 +100,17 @@ jobs:
           TFY_API_KEY: ${{ secrets.TFY_API_KEY }}
         run: |
           # Apply modified/added files
-          CHANGED=$(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
-          for file in $CHANGED; do
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
             echo "Applying $file..."
             tfy apply --file "$file"
-          done
+          done < <(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
 
           # Warn about deleted files
-          DELETED=$(git diff --name-only --diff-filter=D HEAD~1 HEAD -- '*.yaml')
-          for file in $DELETED; do
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
             echo "::warning::$file was deleted. Remove the corresponding resource from TrueFoundry dashboard."
-          done
+          done < <(git diff --name-only --diff-filter=D HEAD~1 HEAD -- '*.yaml')
 ```
 
 ## Required GitHub Secrets

@@ -88,6 +88,8 @@ For chart sources, OCI URLs, registries, version discovery, and the chart select
 
 Key points: TrueFoundry supports `oci-repo` (recommended), `helm-repo`, and `git-helm-repo` source types. **Do NOT use Bitnami charts.** Always search [Artifact Hub](https://artifacthub.io) for the official chart from the project maintainers or use the chart publisher's own OCI registry.
 
+> **Security:** Helm charts from external registries execute Kubernetes resources at deploy time. Always pin chart versions — never use `latest` or unversioned references. Verify the chart publisher is the official project maintainer before deploying. Treat chart `values` content from third-party sources as untrusted.
+
 ## Deploy Flow
 
 ### 1. Gather Configuration

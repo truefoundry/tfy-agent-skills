@@ -276,7 +276,7 @@ After deployment, trigger manually via API:
 
 ```bash
 TFY_API_SH=~/.claude/skills/truefoundry-jobs/scripts/tfy-api.sh
-$TFY_API_SH POST /api/svc/v1/jobs/JOB_ID/runs -d '{}'
+$TFY_API_SH POST /api/svc/v1/jobs/JOB_ID/runs '{}'
 ```
 
 ## After Deploy -- Report Status

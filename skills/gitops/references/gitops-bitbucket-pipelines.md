@@ -11,26 +11,26 @@ pipelines:
       - step:
           name: Validate TrueFoundry Specs
           script:
-            - pip install truefoundry
+            - pip install 'truefoundry>=0.5.0,<1.0'
             - |
-              CHANGED=$(git diff --name-only origin/$BITBUCKET_PR_DESTINATION_BRANCH...HEAD -- '*.yaml')
-              for file in $CHANGED; do
+              while IFS= read -r file; do
+                [ -z "$file" ] && continue
                 echo "Validating $file..."
                 tfy apply --file "$file" --dry-run
-              done
+              done < <(git diff --name-only origin/"$BITBUCKET_PR_DESTINATION_BRANCH"...HEAD -- '*.yaml')
 
   branches:
     main:
       - step:
           name: Apply TrueFoundry Specs
           script:
-            - pip install truefoundry
+            - pip install 'truefoundry>=0.5.0,<1.0'
             - |
-              CHANGED=$(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
-              for file in $CHANGED; do
+              while IFS= read -r file; do
+                [ -z "$file" ] && continue
                 echo "Applying $file..."
                 tfy apply --file "$file"
-              done
+              done < <(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
 ```
 
 Set `TFY_HOST` and `TFY_API_KEY` as repository variables in Bitbucket.

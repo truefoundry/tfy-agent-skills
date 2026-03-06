@@ -193,13 +193,18 @@ A basic TrueFoundry service manifest looks like this:
 
 ### Before Submitting
 
+> **Security: Credential Handling**
+> - NEVER embed raw API keys, passwords, or tokens in manifest `env` fields.
+> - Always use `tfy-secret://` references for sensitive environment variables.
+> - If the user provides a raw credential, warn them and suggest creating a TrueFoundry secret group first (use the `secrets` skill).
+
 **ALWAYS confirm with the user before creating a deployment:**
 
 1. **Service name** — What should the app be called?
 2. **Image** — Full image URI (e.g., `nginx:latest`, `ghcr.io/user/app:tag`)
 3. **Resources** — CPU request/limit (cores), memory request/limit (MB)
 4. **Ports** — Which ports to expose, protocols (TCP/UDP), expose to internet?
-5. **Environment variables** — Any env vars needed? (API keys, config values)
+5. **Environment variables** — Any env vars needed? (Use `tfy-secret://` references for sensitive values — never inline credentials in manifests)
 6. **Replicas** — How many instances? (min/max for autoscaling)
 7. **Workspace ID** — Which workspace to deploy to?
 

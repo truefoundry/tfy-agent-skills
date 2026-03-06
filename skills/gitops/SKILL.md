@@ -154,8 +154,8 @@ The `tfy apply` command is the core of GitOps with TrueFoundry.
 ### Basic Usage
 
 ```bash
-# Install TrueFoundry CLI
-pip install truefoundry
+# Install TrueFoundry CLI (pin version range to prevent supply-chain attacks)
+pip install 'truefoundry>=0.5.0,<1.0'
 
 # Authenticate (uses TFY_HOST and TFY_API_KEY env vars)
 # TFY_HOST is the TrueFoundry platform URL (same as TFY_BASE_URL)
@@ -172,14 +172,12 @@ tfy apply --file path/to/spec.yaml
 To apply all changed files in a CI/CD pipeline, detect which files were modified in the commit or PR:
 
 ```bash
-# Get list of changed YAML files
-CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.yaml')
-
-# Apply each changed file
-for file in $CHANGED_FILES; do
+# Apply each changed YAML file
+while IFS= read -r file; do
+  [ -z "$file" ] && continue
   echo "Applying $file..."
   tfy apply --file "$file"
-done
+done < <(git diff --name-only HEAD~1 HEAD -- '*.yaml')
 ```
 
 ### Handling Deleted Files
@@ -187,12 +185,11 @@ done
 When a YAML spec file is deleted from the repo, the corresponding resource should be removed. The CI/CD pipeline should detect deleted files and handle them:
 
 ```bash
-# Get deleted files
-DELETED_FILES=$(git diff --name-only --diff-filter=D HEAD~1 HEAD -- '*.yaml')
-
-for file in $DELETED_FILES; do
+# Warn about deleted files
+while IFS= read -r file; do
+  [ -z "$file" ] && continue
   echo "WARNING: $file was deleted. Remove the resource manually from the TrueFoundry dashboard."
-done
+done < <(git diff --name-only --diff-filter=D HEAD~1 HEAD -- '*.yaml')
 ```
 
 ## CI/CD Integration

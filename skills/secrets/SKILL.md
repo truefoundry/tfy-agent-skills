@@ -63,13 +63,19 @@ Secret Groups:
 | dev-secrets   | sg-def   | 3       |
 ```
 
-**Security:** Never display secret values in full. Show only the first few characters or indicate "(set)".
+**Security:** Never display secret values in full. Show only the first few characters or indicate "(set)". The agent must NEVER log, echo, or output raw secret values in any context.
 
 ## Create Secret Group
+
+> **Security: Credential Handling**
+> - The agent must NEVER accept, echo, or transmit raw secret values inline.
+> - Always instruct the user to store secret values in environment variables first, then reference those variables.
+> - If the user provides a raw secret value directly, warn them and suggest using an env var instead.
 
 ### Via Tool Call
 
 ```
+# Prompt user to set secret values as environment variables first
 tfy_secret_groups_create(payload={"name": "my-secrets", ...})
 ```
 
@@ -78,7 +84,10 @@ tfy_secret_groups_create(payload={"name": "my-secrets", ...})
 ### Via Direct API
 
 ```bash
-$TFY_API_SH POST /api/svc/v1/secret-groups '{"name":"my-secrets","integrationId":"INTEGRATION_ID","secrets":[{"key":"DB_PASSWORD","value":"REPLACE_WITH_STRONG_PASSWORD"}]}'
+# SECURITY: Never hardcode secret values in commands — they will appear in shell
+# history and process listings. Read from environment variables or files instead.
+# User must set: export DB_PASSWORD="..." before running this command.
+$TFY_API_SH POST /api/svc/v1/secret-groups '{"name":"my-secrets","integrationId":"INTEGRATION_ID","secrets":[{"key":"DB_PASSWORD","value":"'"$DB_PASSWORD"'"}]}'
 ```
 
 ## Update Secret Group
@@ -88,7 +97,9 @@ Updates secrets in a group. A new version is created for every secret with a mod
 ### Via Tool Call
 
 ```
-tfy_secret_groups_update(id="GROUP_ID", payload={"secrets": [{"key": "DB_PASSWORD", "value": "ROTATED_DB_PASSWORD"}, {"key": "API_KEY", "value": "ROTATED_API_KEY"}]})
+# Instruct user to set env vars with new values, then reference them.
+# The agent must NEVER accept raw secret values — always use indirection.
+tfy_secret_groups_update(id="GROUP_ID", payload={"secrets": [{"key": "DB_PASSWORD", "value": "<from env var>"}, {"key": "API_KEY", "value": "<from env var>"}]})
 ```
 
 **Note:** Requires human approval (HITL) via tool call.
@@ -96,7 +107,8 @@ tfy_secret_groups_update(id="GROUP_ID", payload={"secrets": [{"key": "DB_PASSWOR
 ### Via Direct API
 
 ```bash
-$TFY_API_SH PUT /api/svc/v1/secret-groups/GROUP_ID '{"secrets":[{"key":"DB_PASSWORD","value":"ROTATED_DB_PASSWORD"},{"key":"API_KEY","value":"ROTATED_API_KEY"}]}'
+# SECURITY: Read secret values from environment variables, not inline.
+$TFY_API_SH PUT /api/svc/v1/secret-groups/GROUP_ID '{"secrets":[{"key":"DB_PASSWORD","value":"'"$DB_PASSWORD"'"},{"key":"API_KEY","value":"'"$NEW_API_KEY"'"}]}'
 ```
 
 ## Delete Secret Group
