@@ -329,7 +329,6 @@ Notebooks:
 ## Composability
 
 - **Need workspace**: Use `workspaces` skill to find target workspace
-- **Save workspace for next time**: Use `preferences` skill to remember default workspace
 - **Need GPU info**: Use `workspaces` skill to check available GPU types on cluster
 - **Need volumes**: Use `volumes` skill to create persistent storage, then mount
 - **Deploy model after prototyping**: Use `deploy` or `llm-deploy` skill

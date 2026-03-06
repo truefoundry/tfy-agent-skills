@@ -351,7 +351,6 @@ After deploying, you can connect the model to TrueFoundry's AI Gateway for unifi
 ## Composability
 
 - **Find workspace first**: Use `workspaces` skill to get workspace FQN
-- **Save workspace for next time**: Use `preferences` skill to remember default workspace
 - **Check cluster GPUs**: Use `workspaces` skill for GPU type reference
 - **Manage secrets**: Use `secrets` skill to create/find HF token secret groups
 - **Check deployment status**: Use `applications` skill after deploying

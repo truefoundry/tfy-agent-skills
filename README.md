@@ -54,7 +54,7 @@ Your agent picks the right skill based on what you ask. Deployment skills are ex
 | **Jobs & Pipelines** | [jobs](skills/jobs), [workflows](skills/workflows) |
 | **Dev Environments** | [notebooks](skills/notebooks), [ssh-server](skills/ssh-server) |
 | **Observe & Debug** | [logs](skills/logs), [service-test](skills/service-test), [applications](skills/applications), [tracing](skills/tracing) |
-| **Utility** | [status](skills/status), [workspaces](skills/workspaces), [prompts](skills/prompts), [docs](skills/docs), [preferences](skills/preferences), [access-tokens](skills/access-tokens), [ml-repos](skills/ml-repos) |
+| **Utility** | [status](skills/status), [workspaces](skills/workspaces), [prompts](skills/prompts), [docs](skills/docs), [access-tokens](skills/access-tokens), [ml-repos](skills/ml-repos) |
 
 Each skill is a standalone markdown file (`skills/{name}/SKILL.md`) following the [Agent Skills](https://agentskills.io) open format.
 

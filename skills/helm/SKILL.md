@@ -279,7 +279,6 @@ Next steps:
 ## Composability
 
 - **Find workspace first**: Use `workspaces` skill to get workspace FQN and ID
-- **Save workspace for next time**: Use `preferences` skill to remember default workspace
 - **Check what's deployed**: Use `applications` skill to list existing Helm releases
 - **Test after deployment**: Use `service-test` skill to validate the deployed service
 - **Manage secrets**: Use `secrets` skill to create secret groups before deploy

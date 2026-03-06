@@ -48,7 +48,7 @@ ls tfy-manifest.yaml truefoundry.yaml 2>/dev/null
 
 - `TFY_BASE_URL` and `TFY_API_KEY` must be set (env or `.env`).
 - **`TFY_HOST` must be set before any `tfy` CLI command.** The export above handles this automatically.
-- `TFY_WORKSPACE_FQN` required. **Never auto-pick. Always ask the user.**
+- `TFY_WORKSPACE_FQN` required. **HARD RULE: Never auto-pick a workspace. Always ask the user to confirm, even if only one workspace exists or a preference is saved.** See `references/prerequisites.md` for the full workspace confirmation flow.
 - For full credential setup, see `references/prerequisites.md`.
 
 > **WARNING:** Never use `source .env`. The `tfy-api.sh` script handles `.env` parsing automatically. For shell access: `grep KEY .env | cut -d= -f2-`
@@ -207,7 +207,6 @@ These references are available for all workflows — load as needed:
 - **Deploy Helm charts**: Use `helm` skill
 - **Deploy LLMs**: Use `llm-deploy` skill
 - **Test after deploy**: Use `service-test` skill
-- **Save preferences**: Use `preferences` skill
 
 ## Success Criteria
 

@@ -59,11 +59,18 @@ If your `.env` only has `TFY_BASE_URL`, derive CLI host before running `tfy depl
 export TFY_HOST="${TFY_HOST:-${TFY_BASE_URL%/}}"
 ```
 
-## Workspace FQN Rule
+## Workspace FQN Rule — MANDATORY
 
-**Never auto-pick a workspace.** Always ask the user.
+> **HARD RULE: Never auto-pick a workspace. Never silently select a workspace. Always ask the user to confirm, even if there is only one workspace available.**
 
-Users may have access to multiple workspaces across clusters, and deploying to the wrong one can be disruptive. If `TFY_WORKSPACE_FQN` is not set, STOP and ask the user. Suggest using the `workspaces` skill or the TrueFoundry dashboard.
+Deploying to the wrong workspace can be disruptive and hard to reverse. You MUST follow this flow:
+
+1. **If `TFY_WORKSPACE_FQN` is set in the environment** — confirm with the user: "I see workspace `X` in your environment. Should I deploy there?"
+2. **If only one workspace is returned by the API** — still confirm: "You have access to workspace `X`. Should I deploy there?"
+4. **If multiple workspaces exist** — present the list and ask the user to choose.
+5. **If no workspace is found** — STOP and ask. Suggest using the `workspaces` skill or the TrueFoundry dashboard.
+
+**Do NOT skip confirmation even when the choice seems obvious.** The user must explicitly approve the target workspace before any manifest is created or deployment is started.
 
 ## .env File
 
