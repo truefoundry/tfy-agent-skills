@@ -92,15 +92,23 @@ Before submitting a PR:
 2. Run validation and failure-mode tests:
    ```bash
    ./scripts/validate-skills.sh
+   ./scripts/validate-skill-security.sh
    ./scripts/test-tfy-api.sh
    ```
 
-3. Run the installer to verify skills install correctly:
+3. (Optional but recommended) Enable local pre-push checks once:
+   ```bash
+   ./scripts/setup-git-hooks.sh
+   ```
+   This installs a git pre-push hook that runs both `validate-skills.sh` and
+   `validate-skill-security.sh --changed` before every push.
+
+4. Run the installer to verify skills install correctly:
    ```bash
    ./scripts/install.sh
    ```
 
-4. Spot-check modified skills by reading them end-to-end for coherence.
+5. Spot-check modified skills by reading them end-to-end for coherence.
 
 ## Submitting Changes
 
