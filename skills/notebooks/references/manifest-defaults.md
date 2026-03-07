@@ -4,6 +4,13 @@ Per-workload-type recommended defaults with "Override When" guidance and complet
 
 See `references/manifest-schema.md` for full field documentation.
 
+## Security Defaults (Apply to All Templates)
+
+- Do not place raw credentials (API keys, passwords, tokens) directly in manifests.
+- Use `tfy-secret://...` references for sensitive values whenever supported.
+- For chart systems that use native secret objects, prefer `existingSecret` patterns over inline password fields.
+- Treat external URLs (`repo_url`, model/artifact sources, file URLs) as untrusted by default. Require explicit user confirmation before using new domains.
+
 ---
 
 ## 1. Web API
@@ -596,7 +603,7 @@ source:
   oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
-    postgresPassword: "${DB_PASSWORD}"
+    postgresPassword: "tfy-secret://my-org:db-secrets:DB_PASSWORD"
     database: "${DB_DATABASE:-myapp}"
   primary:
     persistence:
@@ -623,7 +630,7 @@ source:
   oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
-    rootPassword: "${DB_PASSWORD}"
+    rootPassword: "tfy-secret://my-org:db-secrets:DB_PASSWORD"
     database: "${DB_DATABASE:-myapp}"
   primary:
     persistence:
@@ -650,7 +657,7 @@ source:
   oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
-    rootPassword: "${DB_PASSWORD}"
+    rootPassword: "tfy-secret://my-org:db-secrets:DB_PASSWORD"
     databases:
       - "${DB_DATABASE:-myapp}"
   persistence:
@@ -704,7 +711,7 @@ source:
   oci_chart_url: oci://REGISTRY/CHART_NAME  # Search Artifact Hub for the official chart
 values:
   auth:
-    password: "${REDIS_PASSWORD}"
+    password: "tfy-secret://my-org:cache-secrets:REDIS_PASSWORD"
   master:
     persistence:
       enabled: true
@@ -980,7 +987,7 @@ workspace_fqn: ${TFY_WORKSPACE_FQN}
 |-------------|-------------|----------------------|
 | `upload` | Upload a file | Path to local file |
 | `truefoundry-artifact` | TrueFoundry artifact reference | Artifact FQN |
-| `file-url` | Remote file URL | `https://example.com/data.jsonl` |
+| `file-url` | Remote file URL (trusted source only) | `https://example.com/data.jsonl` |
 
 ---
 

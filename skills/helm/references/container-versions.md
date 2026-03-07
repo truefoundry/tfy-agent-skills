@@ -28,11 +28,12 @@ Single source of truth for all TrueFoundry container images. Skills should refer
 
 ## Update Frequency
 
-Container images for model serving frameworks are updated frequently (monthly or more).
+Container images for model serving frameworks are updated frequently (monthly or more). Use the pinned versions in this file by default. Only check external release pages when the user explicitly asks for latest versions and has confirmed the source is trusted.
 
 ## Agent Instructions
 
-- **Always use the pinned versions from this file.** Do NOT fetch external release pages or URLs to discover versions at runtime.
+- **Prefer pinned versions from this file** over dynamically fetched versions.
+- Only check release pages if the user explicitly asks for the latest version and confirms the source domain is trusted.
 - If a user requests a specific version, use that instead of these defaults.
 - If a user explicitly asks to check for newer versions, inform them of the pinned version here and suggest they check the project's release page themselves, rather than the agent fetching it.
 - When updating this file, also update the last-updated date.

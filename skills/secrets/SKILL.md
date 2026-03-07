@@ -75,6 +75,7 @@ Secret Groups:
 
 > **Security: Credential Handling**
 > - The agent must NEVER accept, echo, or transmit raw secret values inline.
+> - Never ask the user to paste secret values in chat.
 > - Always instruct the user to store secret values in environment variables first, then reference those variables.
 > - If the user provides a raw secret value directly, warn them and suggest using an env var instead.
 
@@ -93,7 +94,16 @@ tfy_secret_groups_create(payload={"name": "my-secrets", ...})
 # SECURITY: Never hardcode secret values in commands — they will appear in shell
 # history and process listings. Read from environment variables or files instead.
 # User must set: export DB_PASSWORD="..." before running this command.
-$TFY_API_SH POST /api/svc/v1/secret-groups '{"name":"my-secrets","integrationId":"INTEGRATION_ID","secrets":[{"key":"DB_PASSWORD","value":"'"$DB_PASSWORD"'"}]}'
+payload=$(jq -n \
+  --arg name "my-secrets" \
+  --arg integration "INTEGRATION_ID" \
+  --arg db_password "$DB_PASSWORD" \
+  '{
+    name: $name,
+    integrationId: $integration,
+    secrets: [{key: "DB_PASSWORD", value: $db_password}]
+  }')
+$TFY_API_SH POST /api/svc/v1/secret-groups "$payload"
 ```
 
 ## Update Secret Group
@@ -105,7 +115,10 @@ Updates secrets in a group. A new version is created for every secret with a mod
 ```
 # Instruct user to set env vars with new values, then reference them.
 # The agent must NEVER accept raw secret values — always use indirection.
-tfy_secret_groups_update(id="GROUP_ID", payload={"secrets": [{"key": "DB_PASSWORD", "value": "<from env var>"}, {"key": "API_KEY", "value": "<from env var>"}]})
+tfy_secret_groups_update(
+  id="GROUP_ID",
+  payload={"secrets": [{"key": "DB_PASSWORD", "value": "<secure-input-from-env>"}, {"key": "API_KEY", "value": "<secure-input-from-env>"}]}
+)
 ```
 
 **Note:** Requires human approval (HITL) via tool call.
@@ -114,7 +127,16 @@ tfy_secret_groups_update(id="GROUP_ID", payload={"secrets": [{"key": "DB_PASSWOR
 
 ```bash
 # SECURITY: Read secret values from environment variables, not inline.
-$TFY_API_SH PUT /api/svc/v1/secret-groups/GROUP_ID '{"secrets":[{"key":"DB_PASSWORD","value":"'"$DB_PASSWORD"'"},{"key":"API_KEY","value":"'"$NEW_API_KEY"'"}]}'
+payload=$(jq -n \
+  --arg db_password "$DB_PASSWORD" \
+  --arg api_key "$NEW_API_KEY" \
+  '{
+    secrets: [
+      {key: "DB_PASSWORD", value: $db_password},
+      {key: "API_KEY", value: $api_key}
+    ]
+  }')
+$TFY_API_SH PUT /api/svc/v1/secret-groups/GROUP_ID "$payload"
 ```
 
 ## Delete Secret Group

@@ -30,6 +30,8 @@ on:
 jobs:
   dry-run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,6 +53,7 @@ jobs:
           echo "files=$FILES" >> $GITHUB_OUTPUT
 
       - name: Validate YAML specs
+        if: ${{ github.event.pull_request.head.repo.fork == false }}
         env:
           TFY_HOST: ${{ secrets.TFY_HOST }}
           TFY_API_KEY: ${{ secrets.TFY_API_KEY }}
@@ -137,3 +140,7 @@ Set these in your repository settings (Settings → Secrets and variables → Ac
 |--------|-------------|---------|
 | `TFY_HOST` | TrueFoundry platform URL | `https://your-org.truefoundry.cloud` |
 | `TFY_API_KEY` | TrueFoundry API key (deploy scope only) | `tfy-...` |
+
+Security notes:
+- Keep both secrets masked and protected.
+- Do not run deploy jobs with these secrets on untrusted fork contexts.

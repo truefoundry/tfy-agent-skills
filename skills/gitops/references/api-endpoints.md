@@ -1,7 +1,7 @@
 # TrueFoundry API Endpoints Reference
 
 Base URL: `$TFY_BASE_URL` (e.g. `https://your-org.truefoundry.cloud`)
-Auth: `Authorization: Bearer $TFY_API_KEY`
+Auth: `Authorization: Bearer $TFY_API_KEY` (read from env; never hardcode or print token values in logs)
 
 ## Applications
 | Method | Path | Description |

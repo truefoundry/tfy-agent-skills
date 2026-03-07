@@ -75,3 +75,5 @@ Set these as **masked and protected** variables in GitLab (Settings â†’ CI/CD â†
 |----------|--------|-----------|-------------|
 | `TFY_HOST` | Yes | Yes | TrueFoundry platform URL (e.g., `https://your-org.truefoundry.cloud`) |
 | `TFY_API_KEY` | Yes | Yes | TrueFoundry API key with deploy scope only |
+
+Restrict deploy jobs to protected branches/environments.

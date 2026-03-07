@@ -40,7 +40,7 @@ Deploy, schedule, and monitor TrueFoundry job runs. Two paths:
 
 1. **Credentials** -- `TFY_BASE_URL` and `TFY_API_KEY` must be set (env or `.env`)
 2. **Workspace** -- `TFY_WORKSPACE_FQN` required. **Never auto-pick. Ask the user if missing.**
-3. **CLI** -- Check if `tfy` CLI is available: `tfy --version`. If not, `pip install truefoundry`.
+3. **CLI** -- Check if `tfy` CLI is available: `tfy --version`. If not, install a pinned version (`pip install truefoundry==0.5.0`).
 
 For credential check commands and .env setup, see `references/prerequisites.md`.
 
@@ -54,6 +54,11 @@ For credential check commands and .env setup, see `references/prerequisites.md`.
 - One-time or scheduled?
 - Resource requirements (CPU/GPU/memory)
 - Expected duration
+
+> **Security requirements**
+> - Never request or print raw secret values in chat.
+> - For sensitive env vars (tokens/passwords/keys), require `tfy-secret://...` references instead of inline values.
+> - For `build_source.type: git`, use trusted repositories and prefer immutable refs (commit SHA or pinned tag) over floating branches.
 
 ### Step 2: Generate YAML Manifest
 
@@ -93,6 +98,7 @@ image:
     type: git
     repo_url: https://github.com/user/repo
     branch_name: main
+    ref: 3f2a1c9b0d7e6f5a4b3c2d1e0f9876543210abcd
   build_spec:
     type: dockerfile
     dockerfile_path: Dockerfile
@@ -119,6 +125,7 @@ image:
     type: git
     repo_url: https://github.com/user/repo
     branch_name: main
+    ref: 3f2a1c9b0d7e6f5a4b3c2d1e0f9876543210abcd
   build_spec:
     type: tfy-python-buildpack
     command: python train.py

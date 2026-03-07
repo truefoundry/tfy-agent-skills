@@ -57,3 +57,5 @@ Set these as **secured** variables in Bitbucket (Settings → Repository variabl
 |----------|---------|-------------|
 | `TFY_HOST` | Yes | TrueFoundry platform URL (e.g., `https://your-org.truefoundry.cloud`) |
 | `TFY_API_KEY` | Yes | TrueFoundry API key with deploy scope only |
+
+Restrict deployment pipelines to trusted branches only.

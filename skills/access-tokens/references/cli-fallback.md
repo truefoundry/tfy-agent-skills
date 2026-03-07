@@ -11,8 +11,8 @@ tfy --version 2>/dev/null
 | Result | Action |
 |--------|--------|
 | `tfy version X.Y.Z` (>= 0.5.0) | Use `tfy apply -f manifest.yaml` (primary path) |
-| `tfy version X.Y.Z` (0.3.x-0.4.x) | Upgrade recommended: `pip install -U truefoundry`. Core `tfy apply` should still work. |
-| `servicefoundry version X.Y.Z` | Legacy CLI. Upgrade: `pip install -U truefoundry` |
+| `tfy version X.Y.Z` (0.3.x-0.4.x) | Upgrade recommended: install a pinned version (example: `pip install truefoundry==0.5.0`). Core `tfy apply` should still work. |
+| `servicefoundry version X.Y.Z` | Legacy CLI. Upgrade to pinned `truefoundry` package (example: `pip install truefoundry==0.5.0`) |
 | Command not found | Fall back to REST API (see below) |
 
 ## CLI Path (Primary)
@@ -79,7 +79,7 @@ $TFY_API_SH GET "/api/svc/v1/apps?workspaceFqn=${TFY_WORKSPACE_FQN}&applicationN
 ## Install CLI
 
 ```bash
-pip install truefoundry
+pip install 'truefoundry==0.5.0'
 
 # Interactive login (recommended — avoids exposing credentials in shell history)
 tfy login --host "${TFY_HOST:-${TFY_BASE_URL%/}}"

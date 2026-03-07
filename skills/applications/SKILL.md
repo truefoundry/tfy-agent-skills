@@ -169,8 +169,8 @@ A basic TrueFoundry service manifest looks like this:
       "memory_limit": 512
     },
     "env": {
-      "KEY": "value",
-      "SECRET_KEY": "tfy-secret://my-org:my-secrets:SECRET_KEY"
+      "APP_MODE": "production",
+      "THIRD_PARTY_API_KEY": "tfy-secret://my-org:my-app-secrets:THIRD_PARTY_API_KEY"
     },
     "replicas": {
       "min": 1,
@@ -197,6 +197,7 @@ A basic TrueFoundry service manifest looks like this:
 > - NEVER embed raw API keys, passwords, or tokens in manifest `env` fields.
 > - Always use `tfy-secret://` references for sensitive environment variables.
 > - If the user provides a raw credential, warn them and suggest creating a TrueFoundry secret group first (use the `secrets` skill).
+> - Never ask the user to paste secret values directly into the conversation.
 
 **ALWAYS confirm with the user before creating a deployment:**
 
@@ -204,7 +205,7 @@ A basic TrueFoundry service manifest looks like this:
 2. **Image** — Full image URI (e.g., `nginx:latest`, `ghcr.io/user/app:tag`)
 3. **Resources** — CPU request/limit (cores), memory request/limit (MB)
 4. **Ports** — Which ports to expose, protocols (TCP/UDP), expose to internet?
-5. **Environment variables** — Any env vars needed? (Use `tfy-secret://` references for sensitive values — never inline credentials in manifests)
+5. **Environment variables** — Any env vars needed? (For sensitive values, only accept `tfy-secret://` references — never inline credentials in manifests)
 6. **Replicas** — How many instances? (min/max for autoscaling)
 7. **Workspace ID** — Which workspace to deploy to?
 
@@ -220,7 +221,7 @@ tfy_applications_create_deployment(
         "image": {"type": "image", "image_uri": "nginx:latest"},
         "ports": [{"port": 8000, "protocol": "TCP", "expose": false}],
         "resources": {"cpu_request": 0.25, "cpu_limit": 0.5, "memory_request": 256, "memory_limit": 512},
-        "env": {"KEY": "value"},
+        "env": {"APP_MODE": "production", "THIRD_PARTY_API_KEY": "tfy-secret://my-org:my-app-secrets:THIRD_PARTY_API_KEY"},
         "replicas": {"min": 1, "max": 1}
     },
     options={"workspace_id": "ws-id-here", "force_deploy": true}
@@ -239,7 +240,7 @@ $TFY_API_SH PUT /api/svc/v1/apps '{
     "image": {"type": "image", "image_uri": "nginx:latest"},
     "ports": [{"port": 8000, "protocol": "TCP", "expose": false}],
     "resources": {"cpu_request": 0.25, "cpu_limit": 0.5, "memory_request": 256, "memory_limit": 512},
-    "env": {"KEY": "value"},
+    "env": {"APP_MODE": "production", "THIRD_PARTY_API_KEY": "tfy-secret://my-org:my-app-secrets:THIRD_PARTY_API_KEY"},
     "replicas": {"min": 1, "max": 1}
   },
   "workspaceId": "ws-id-here"

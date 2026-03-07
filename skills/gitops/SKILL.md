@@ -35,7 +35,7 @@ Set up automated Git-based deployments with `tfy apply`. Store TrueFoundry YAML 
 **Always verify before setting up GitOps:**
 
 1. **Credentials** — `TFY_BASE_URL` and `TFY_API_KEY` must be set (env or `.env`)
-2. **TrueFoundry CLI** — `tfy` CLI must be available in the CI/CD environment (installed via `pip install truefoundry`)
+2. **TrueFoundry CLI** — `tfy` CLI must be available in the CI/CD environment (pin an exact version, avoid floating installs)
 3. **Git repository** — A Git repo to store deployment specs
 
 For credential check commands and .env setup, see `references/prerequisites.md`. Use the `status` skill to verify connection before proceeding.
@@ -175,6 +175,15 @@ To apply all changed files in a CI/CD pipeline, detect which files were modified
 # Apply each changed YAML file
 while IFS= read -r file; do
   [ -z "$file" ] && continue
+  case "$file" in
+    *.yaml) ;;
+    *) echo "Skipping non-yaml path: $file"; continue ;;
+  esac
+  # Keep apply scope constrained to your config tree
+  case "$file" in
+    truefoundry-configs/*) ;;
+    *) echo "Skipping out-of-scope path: $file"; continue ;;
+  esac
   echo "Applying $file..."
   tfy apply --file "$file"
 done < <(git diff --name-only HEAD~1 HEAD -- '*.yaml')
@@ -201,6 +210,13 @@ For complete workflow files for each CI provider:
 - **Bitbucket Pipelines**: See [references/gitops-bitbucket-pipelines.md](references/gitops-bitbucket-pipelines.md) -- PR validation and branch-based deploy.
 
 All providers require `TFY_HOST` and `TFY_API_KEY` as repository secrets/variables.
+
+### CI Security Hardening (Required)
+
+- Run deploy jobs only on trusted contexts (for example, default-branch merges), not untrusted fork PRs.
+- Keep `TFY_API_KEY` scoped minimally and rotated regularly.
+- Prefer protected environments/branches for production applies.
+- Avoid printing env vars or command traces that can expose secret material.
 
 ## Step-by-Step: Setting Up GitOps (Summary)
 
