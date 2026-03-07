@@ -28,11 +28,12 @@ Single source of truth for all TrueFoundry container images. Skills should refer
 
 ## Update Frequency
 
-Container images for model serving frameworks are updated frequently (monthly or more). When deploying, consider checking for newer versions using WebFetch on the release pages above.
+Container images for model serving frameworks are updated frequently (monthly or more). Use the pinned versions in this file by default. Only check external release pages when the user explicitly asks for latest versions and has confirmed the source is trusted.
 
 ## Agent Instructions
 
-- **Prefer pinned versions from this file** over dynamically fetched versions. Only check release pages if the user explicitly asks for the latest version.
+- **Prefer pinned versions from this file** over dynamically fetched versions.
+- Only check release pages if the user explicitly asks for the latest version and confirms the source domain is trusted.
 - If a user requests a specific version, use that instead of these defaults.
 - When updating this file, also update the last-updated date.
 - For notebooks and SSH servers, ask the user if they need GPU support to choose the correct image variant.

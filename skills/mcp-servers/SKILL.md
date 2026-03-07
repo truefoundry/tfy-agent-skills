@@ -61,6 +61,12 @@ MCP Servers:
 
 Connects to an existing MCP endpoint over streamable-http or SSE.
 
+> **Security gates (required before registration):**
+> 1. Confirm the URL owner/domain with the user.
+> 2. Require explicit user confirmation before using any new external URL.
+> 3. Use secret references for all auth material (`tfy-secret://...`), never raw tokens.
+> 4. Avoid logging full auth headers, client secrets, or certificates.
+
 ### Attach an Existing TrueFoundry Deployment
 
 Use this flow when the user says "attach deployment to MCP gateway" or already has a deployed MCP-compatible service.
@@ -139,10 +145,9 @@ auth_data:
 
 ```yaml
 tls_settings:
-  ca_cert: |
-    -----BEGIN CERTIFICATE-----
-    ...
-    -----END CERTIFICATE-----
+  # Prefer storing certificate material in a secret reference, then injecting at runtime.
+  # Avoid inlining full certificate PEM blocks in manifests shared via chat or git.
+  ca_cert: tfy-secret://my-org:mcp-secrets:ca-cert-pem
   insecure_skip_verify: false
 ```
 
@@ -200,6 +205,8 @@ $TFY_API_SH PUT /api/svc/v1/apps "$(cat mcp-server-virtual.yaml | yq -o json)"
 Wraps an OpenAPI specification as an MCP server. Supports up to 30 tools derived from API operations.
 
 > **Security: Remote OpenAPI specs are fetched at runtime and auto-converted into MCP tools that control agent capabilities. Only use trusted, verified spec URLs. For sensitive environments, prefer `spec.type: inline` to eliminate the runtime dependency on external endpoints.**
+>
+> **Execution policy:** Do not fetch or register a new remote spec URL until the user explicitly confirms the source is trusted for tool generation.
 
 ### Manifest (remote spec URL)
 
@@ -209,7 +216,7 @@ type: mcp-server/openapi
 description: Petstore API exposed as MCP tools
 spec:
   type: remote
-  url: https://petstore.swagger.io/v2/swagger.json
+  url: https://internal-api.example.com/openapi.json
 collaborators:
   - subject: user:dev@example.com
     role_id: viewer

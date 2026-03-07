@@ -390,7 +390,7 @@ resources:
 home_directory_size: 20
 cull_timeout: 60
 env:
-  JUPYTER_TOKEN: my-secret-token
+  JUPYTER_TOKEN: tfy-secret://my-org:notebook-secrets:JUPYTER_TOKEN
 workspace_fqn: cluster-id:workspace-name
 ```
 
@@ -626,6 +626,7 @@ image:
     type: git
     repo_url: "https://github.com/user/repo"
     branch_name: "main"
+    ref: "3f2a1c9b0d7e6f5a4b3c2d1e0f9876543210abcd"
   build_spec:
     type: dockerfile
     dockerfile_path: "Dockerfile"
@@ -640,6 +641,8 @@ image:
 | `repo_url` | string | Yes (git) | Git repository URL |
 | `branch_name` | string | No (git) | Branch to build from. Default: current branch (`git branch --show-current`). |
 | `ref` | string | Yes (git) | Git ref (branch name, commit SHA, or tag). Required by `tfy apply` for git build sources. Typically set to the same value as `branch_name`. |
+
+> **Security:** For `build_source.type: git`, use trusted repositories only and prefer immutable refs (commit SHA or pinned tag) over floating branches.
 | `project_root_path` | string | Yes (local) | Path to local project root |
 
 ### BuildSpec
@@ -1198,7 +1201,7 @@ sample_inputs:
   - text: "What's the return policy for electronics?"
 ```
 
-> **Security:** `agent_card_url` and `hosted-a2a-agent` sources are fetched at runtime and can influence agent behavior. Only register agents from trusted, authenticated endpoints. Use `headers` with secret references for auth.
+> **Security:** `agent_card_url` and `hosted-a2a-agent` sources are fetched at runtime and can influence agent behavior. Only register agents from trusted, authenticated endpoints. Require explicit user confirmation before onboarding a new external URL, and use `headers` with secret references for auth.
 
 ### A2A Agent Example
 
@@ -1407,7 +1410,7 @@ enable_all_tools: true
 type: mcp-server-url
 url: "https://my-mcp-server.example.com/mcp"
 headers:
-  Authorization: "Bearer my-token"
+  Authorization: "Bearer tfy-secret://my-org:mcp-secrets:api-token"
 enable_all_tools: false
 tools:
   - name: search_repos

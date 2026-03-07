@@ -70,6 +70,13 @@ No SDKs to learn, no code to write. Your agent handles everything.
 # Edit shared files in skills/_shared/, then sync to all skills
 ./scripts/sync-shared.sh
 
+# Run local validation (including offline security checks)
+./scripts/validate-skills.sh
+./scripts/validate-skill-security.sh
+
+# Optional: enable pre-push hook so checks run automatically before git push
+./scripts/setup-git-hooks.sh
+
 # Install and restart
 ./scripts/install.sh
 ```

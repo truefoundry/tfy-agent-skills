@@ -22,6 +22,8 @@ on:
 jobs:
   dry-run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,7 +35,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install TrueFoundry CLI
-        run: pip install 'truefoundry>=0.5.0,<1.0'
+        run: pip install 'truefoundry==0.5.0'
 
       - name: Get changed files
         id: changed
@@ -42,6 +44,7 @@ jobs:
           echo "files=$FILES" >> $GITHUB_OUTPUT
 
       - name: Validate YAML specs
+        if: ${{ github.event.pull_request.head.repo.fork == false }}
         env:
           TFY_HOST: ${{ secrets.TFY_HOST }}
           TFY_API_KEY: ${{ secrets.TFY_API_KEY }}
@@ -92,7 +95,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install TrueFoundry CLI
-        run: pip install 'truefoundry>=0.5.0,<1.0'
+        run: pip install 'truefoundry==0.5.0'
 
       - name: Apply changed specs
         env:
@@ -121,3 +124,7 @@ Set these in your repository settings (Settings -> Secrets and variables -> Acti
 |--------|-------------|---------|
 | `TFY_HOST` | TrueFoundry platform URL | `https://your-org.truefoundry.cloud` |
 | `TFY_API_KEY` | TrueFoundry API key | `tfy-...` |
+
+Security notes:
+- Keep both secrets masked and protected.
+- Do not run deploy jobs with these secrets on untrusted fork contexts.

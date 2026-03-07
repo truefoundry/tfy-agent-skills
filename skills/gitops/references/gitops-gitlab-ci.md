@@ -17,7 +17,7 @@ cache:
 .tfy-setup: &tfy-setup
   image: python:3.12-slim
   before_script:
-    - pip install 'truefoundry>=0.5.0,<1.0'
+    - pip install 'truefoundry==0.5.0'
 
 dry-run:
   <<: *tfy-setup
@@ -50,4 +50,4 @@ apply:
       done < <(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
 ```
 
-Set `TFY_HOST` and `TFY_API_KEY` as CI/CD variables in GitLab (Settings -> CI/CD -> Variables).
+Set `TFY_HOST` and `TFY_API_KEY` as masked/protected CI/CD variables in GitLab (Settings -> CI/CD -> Variables), and restrict deploy jobs to protected branches/environments.
