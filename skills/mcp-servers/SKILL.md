@@ -67,6 +67,21 @@ Connects to an existing MCP endpoint over streamable-http or SSE.
 > 3. Use secret references for all auth material (`tfy-secret://...`), never raw tokens.
 > 4. Avoid logging full auth headers, client secrets, or certificates.
 
+### Attach an Existing TrueFoundry Deployment
+
+Use this flow when the user says "attach deployment to MCP gateway" or already has a deployed MCP-compatible service.
+
+1. Confirm the deployment is healthy (`DEPLOY_SUCCESS`) and endpoint is reachable
+2. Collect endpoint details:
+   - URL (public or internal)
+   - transport (`streamable-http` or `sse`)
+   - auth mode (`header`, `oauth2`, or `passthrough`)
+3. Register it as `type: mcp-server/remote`
+4. Return server ID and name so users can reference it from guardrails/policies
+
+Example internal URL pattern for service deployments:
+`http://{service-name}.{namespace}.svc.cluster.local:{port}/mcp`
+
 ### Manifest
 
 ```yaml
