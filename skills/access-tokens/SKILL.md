@@ -74,16 +74,20 @@ $TFY_API_SH POST /api/svc/v1/personal-access-tokens '{"name":"my-token"}'
 **IMPORTANT:** The token value is returned ONLY in the creation response.
 
 > **Security: Token Display Policy**
-> - Display the token value exactly once from the API creation response so the user can copy it.
-> - After displaying, instruct the user to store it in a secure location immediately.
-> - The agent must NEVER store, log, or re-display the token value after the initial creation response.
+> - Default to showing only a masked preview (for example: first 4 + last 4 characters).
+> - Show the full token only after explicit user confirmation that they are ready to copy it now.
+> - If a full token is shown, show it only once, in a minimal response, and never repeat it in summaries/follow-up messages.
+> - The agent must NEVER store, log, or re-display the token value after the initial one-time reveal.
 > - If the user asks to see the token again later, instruct them to create a new token.
 
 Present the result:
 ```
 Token created successfully!
 Name: my-token
-Token: <value from API response — shown once>
+Token (masked): tfy_****...****
+
+If user explicitly confirms they are ready to copy it:
+One-time token: <full value from API response>
 
 ⚠️  Save this token NOW — it will not be shown again.
 Store it in a password manager, CI/CD secret store, or TrueFoundry secret group.
@@ -114,7 +118,8 @@ $TFY_API_SH DELETE /api/svc/v1/personal-access-tokens/TOKEN_ID
 ## Success Criteria
 
 - The user can list all personal access tokens in a formatted table
-- The user can create a new token and receives the token value
+- The user can create a new token and receives a masked preview by default
+- Full token reveal happens only on explicit confirmation and only once
 - The user has been warned to save the token value immediately
 - The user can delete a token after confirmation
 - The agent has never displayed existing token values — only new tokens at creation time

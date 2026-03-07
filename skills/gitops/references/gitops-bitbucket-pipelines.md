@@ -11,7 +11,7 @@ pipelines:
       - step:
           name: Validate TrueFoundry Specs
           script:
-            - pip install 'truefoundry>=0.5.0,<1.0'
+            - pip install 'truefoundry==0.5.0'
             - |
               while IFS= read -r file; do
                 [ -z "$file" ] && continue
@@ -24,7 +24,7 @@ pipelines:
       - step:
           name: Apply TrueFoundry Specs
           script:
-            - pip install 'truefoundry>=0.5.0,<1.0'
+            - pip install 'truefoundry==0.5.0'
             - |
               while IFS= read -r file; do
                 [ -z "$file" ] && continue
@@ -33,4 +33,4 @@ pipelines:
               done < <(git diff --name-only --diff-filter=ACMR HEAD~1 HEAD -- '*.yaml')
 ```
 
-Set `TFY_HOST` and `TFY_API_KEY` as repository variables in Bitbucket.
+Set `TFY_HOST` and `TFY_API_KEY` as secured repository variables in Bitbucket. Restrict deployment pipelines to trusted branches only.

