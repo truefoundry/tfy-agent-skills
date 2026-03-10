@@ -5,7 +5,7 @@ Use the Python library pattern when processing time exceeds 1 minute per message
 ## Step 1: Install the Library
 
 ```bash
-pip install truefoundry[async]
+pip install 'truefoundry[async]==0.5.0'
 ```
 
 ## Step 2: Implement the Handler

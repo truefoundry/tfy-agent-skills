@@ -16,8 +16,8 @@ Create or update TrueFoundry resources from YAML manifest files using `tfy apply
 | CLI Output | Status | Action |
 |-----------|--------|--------|
 | `tfy version X.Y.Z` (>= 0.5.0) | Current | Use `tfy apply` as documented |
-| `tfy version X.Y.Z` (0.3.x-0.4.x) | Outdated | Upgrade: `pip install -U truefoundry`. Core `tfy apply` still works. |
-| `servicefoundry version X.Y.Z` | Legacy CLI | Upgrade: `pip install -U truefoundry` |
+| `tfy version X.Y.Z` (0.3.x-0.4.x) | Outdated | Upgrade: install a pinned version (e.g. `pip install 'truefoundry==0.5.0'`). Core `tfy apply` still works. |
+| `servicefoundry version X.Y.Z` | Legacy CLI | Upgrade to pinned `truefoundry` (e.g. `pip install 'truefoundry==0.5.0'`). |
 | Command not found | Not installed | Install: `pip install 'truefoundry==0.5.0' && tfy login --host "$TFY_BASE_URL"` |
 
 For full environment detection (SDK + CLI + Python):

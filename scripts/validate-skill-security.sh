@@ -133,10 +133,12 @@ report_match \
   '(sudo[[:space:]]+apt(-get)?[[:space:]]+install[[:space:]]+proxy-?tunnel|>>[[:space:]]*/home/jovyan/\.ssh/authorized_keys)'
 
 # Supply-chain hygiene for CLI guidance.
+# Match: pip install truefoundry | pip install -U truefoundry | pip install --upgrade truefoundry | pip install truefoundry[extras]
+# Exclude: pip install 'truefoundry==X.Y.Z' (pinned).
 report_match \
   "SC001" \
   "Unpinned TrueFoundry CLI install command found." \
-  'pip install[[:space:]]+truefoundry([[:space:]]|$)'
+  'pip install[[:space:]]+((-U|--upgrade)[[:space:]]+)?truefoundry([[:space:]]|$|\[)'
 
 # PAT safety policy must remain strict.
 if [[ -f "$REPO_ROOT/skills/access-tokens/SKILL.md" ]]; then

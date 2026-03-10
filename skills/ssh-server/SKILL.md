@@ -50,7 +50,7 @@ tfy --version
 | CLI Output | Status | Action |
 |-----------|--------|--------|
 | `tfy version X.Y.Z` (>= 0.5.0) | Current | Use `tfy apply` as documented below. |
-| `tfy version X.Y.Z` (0.3.x-0.4.x) | Outdated | Upgrade: `pip install -U truefoundry`. Core `tfy apply` should still work. |
+| `tfy version X.Y.Z` (0.3.x-0.4.x) | Outdated | Upgrade: install a pinned version (e.g. `pip install 'truefoundry==0.5.0'`). Core `tfy apply` should still work. |
 | Command not found | Not installed | Install: `pip install 'truefoundry==0.5.0' && tfy login --host "$TFY_BASE_URL"` |
 | CLI unavailable (no pip/Python) | Fallback | Use REST API via `tfy-api.sh`. See `references/cli-fallback.md`. |
 
