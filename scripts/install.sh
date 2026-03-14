@@ -131,7 +131,9 @@ download_to_file() {
 }
 
 # ── Download source ──────────────────────────────────────────────────────────
-get_source() {
+# Sets SOURCE_DIR (global) instead of echoing, to avoid subshell issues with
+# trap/cleanup when called via $(get_source).
+resolve_source() {
   # If running from inside the repo, use local files
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)" || true
@@ -142,8 +144,8 @@ get_source() {
       if [ "$REF_SET_BY_ARG" -eq 1 ] || [ "$SHA_SET_BY_ARG" -eq 1 ] || [ -n "${TFY_SKILLS_REF:-}" ] || [ -n "${TFY_SKILLS_SHA256:-}" ]; then
         warn "Using local repo source; --ref/--sha256 and TFY_SKILLS_REF/TFY_SKILLS_SHA256 are ignored."
       fi
-      info "Installing from local repo: ${CYAN}$repo_root${NC}" >&2
-      echo "$repo_root"
+      info "Installing from local repo: ${CYAN}$repo_root${NC}"
+      SOURCE_DIR="$repo_root"
       return 0
     fi
   fi
@@ -151,11 +153,9 @@ get_source() {
   # Download tarball (no git required)
   local tarball_url="https://codeload.github.com/$REPO/tar.gz/$SOURCE_REF"
   info "Downloading ${CYAN}$REPO${NC} ref ${CYAN}$SOURCE_REF${NC}..."
-  local tmpdir
-  tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' EXIT
+  _CLEANUP_DIR=$(mktemp -d)
 
-  local tarball="$tmpdir/source.tar.gz"
+  local tarball="$_CLEANUP_DIR/source.tar.gz"
   download_to_file "$tarball_url" "$tarball"
 
   if [ -n "$EXPECTED_SHA256" ]; then
@@ -174,17 +174,17 @@ get_source() {
     ok "SHA256 verified."
   fi
 
-  tar xz -f "$tarball" -C "$tmpdir"
+  tar xz -f "$tarball" -C "$_CLEANUP_DIR"
 
   # GitHub tarballs extract to a single top-level directory.
   local extracted
-  extracted=$(find "$tmpdir" -mindepth 1 -maxdepth 1 -type d | head -1)
+  extracted=$(find "$_CLEANUP_DIR" -mindepth 1 -maxdepth 1 -type d | head -1)
   if [ -z "$extracted" ] || [ ! -d "$extracted/skills" ]; then
     error "Download failed or unexpected archive structure."
     exit 1
   fi
 
-  echo "$extracted"
+  SOURCE_DIR="$extracted"
 }
 
 # ── Install skills into a target directory ───────────────────────────────────
@@ -288,9 +288,14 @@ detect_and_install() {
 }
 
 # ── Main ─────────────────────────────────────────────────────────────────────
+_CLEANUP_DIR=""
+cleanup() { rm -rf "${_CLEANUP_DIR:-}"; }
+trap cleanup EXIT
+
 printf '\n%sTrueFoundry Skills%s\n\n' "$BOLD" "$NC"
 
-SOURCE_DIR="$(get_source)"
+SOURCE_DIR=""
+resolve_source
 printf "\n"
 
 installed=0
