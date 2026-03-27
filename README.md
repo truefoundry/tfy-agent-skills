@@ -9,11 +9,13 @@ Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, Cline, and Roo Code.
 
 ## Install
 
+Install Gateway skills (default track):
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/truefoundry/tfy-agent-skills/main/scripts/install.sh | bash
 ```
 
-This installs **Gateway** skills (the default track). To install a different track:
+To install a different track:
 
 ```bash
 # Deploy skills (infrastructure, apps, jobs, etc.)
@@ -23,7 +25,9 @@ curl -fsSL https://raw.githubusercontent.com/truefoundry/tfy-agent-skills/main/s
 curl -fsSL https://raw.githubusercontent.com/truefoundry/tfy-agent-skills/main/scripts/install.sh | bash -s -- all
 ```
 
-Restart your agent and start asking. If credentials are not set, your agent will prompt for them. You can also pre-set them via env vars or a `.env` file in your project root:
+Restart your agent and start asking.
+
+If credentials are not set, your agent will prompt for them. You can also pre-set them via env vars or a `.env` file in your project root:
 
 ```bash
 export TFY_BASE_URL=https://your-org.truefoundry.cloud
@@ -33,13 +37,7 @@ export TFY_API_KEY=tfy-...  # https://docs.truefoundry.com/docs/generate-api-key
 
 Do not commit `.env` files or API keys to Git.
 
-If you do not have a TrueFoundry account yet, sign up first with:
-
-```bash
-uv run tfy register
-```
-
-`tfy register` is interactive. Depending on the registration server configuration, it may open a browser window for CAPTCHA or other human verification before asking you to finish email verification. After registration completes, open the tenant URL returned by the CLI, create a personal access token there, and then set `TFY_API_KEY` for the skills that use the platform API.
+If you do not have a TrueFoundry account yet, complete signup first, verify your email, open your tenant URL, create a personal access token, and then set `TFY_API_KEY` for the skills that use the platform API.
 
 ## Product Tracks
 
@@ -99,7 +97,7 @@ No SDKs to learn, no code to write. Your agent handles everything.
 ./scripts/setup-git-hooks.sh
 
 # Install a product track and restart
-./scripts/install.sh gateway
+./scripts/install.sh
 ./scripts/install.sh deploy
 ```
 
